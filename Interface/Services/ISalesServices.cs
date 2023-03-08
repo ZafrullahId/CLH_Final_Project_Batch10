@@ -7,7 +7,7 @@ namespace Dansnom.Interface.Services
 {
     public interface ISalesServices
     {
-         Task<RawMaterialsResponseModel> CalculateAllMonthlyRawMaterialAsync(int year);
+        Task<RawMaterialsResponseModel> CalculateAllMonthlyRawMaterialAsync(int year);
         Task<SalesResponseModel> CalculateAllMonthlySalesAsync(int year);
         Task<ProfitResponseModel> CalculateThisMonthProfitAsync();
         Task<ProfitResponseModel> CalculateMonthlyProfitAsync(int month, int year);
@@ -22,5 +22,7 @@ namespace Dansnom.Interface.Services
         Task<SalesResponseModel> GetSalesForTheYearOnEachProduct(int year);
         Task<SalesResponseModel> GetSalesForThisMonth();
         Task<SalesResponseModel> GetSalesForThisYear();
+        Task<ProfitResponseModel> CalculateNetProfitAsync(int year, int month, decimal extraExpenses);
+        Task<SalesResponseModel> GetSalesByProductNameForTheYear(int productId,int year);
     }
 }

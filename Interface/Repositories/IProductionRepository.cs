@@ -11,6 +11,7 @@ namespace Dansnom.Interface.Repositories
         Task<List<Production>> GetProductionsByProductId(int id);
         decimal GetQuantityRemainingByProductId(int id);
         Task<Production> Create(Production entity);
+        Task<List<Production>> GetAllApprovedProduction();
     }
     
 }

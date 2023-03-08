@@ -19,55 +19,65 @@ namespace Project.Controllers
             _adminServices = adminServices;
         }
         [HttpPost("RegisterAdmin")]
-            public async Task<IActionResult> RegisterAdmin([FromForm]CreateAdminRequestModel request)
-            {
-                var isSuccessful = await _adminServices.AddAdmin(request);
-                if (isSuccessful.Success == false)
-                {
-                    return BadRequest(isSuccessful);
-                }
-                return Ok(isSuccessful);
-            }
-            [HttpGet("GetAllAdmins")]
-            public async Task<IActionResult> GetAllAdmins()
-            {
-                var admins = await _adminServices.GetAllAdmins();
-                if(admins.Success == false)
-                {
-                    return BadRequest(admins);
-                }
-                return Ok(admins);
-            }
-            [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateAsync([FromForm]UpdateAdminRequestModel model, [FromRoute]int id)
+        public async Task<IActionResult> RegisterAdmin([FromForm] CreateAdminRequestModel request)
         {
-            var customer = await _adminServices.UpdateProfile(model,id);
-            if(customer.Success == false)
+            var isSuccessful = await _adminServices.AddAdmin(request);
+            if (isSuccessful.Success == false)
+            {
+                return BadRequest(isSuccessful);
+            }
+            return Ok(isSuccessful);
+        }
+        [HttpPost("CompleteRegistration")]
+        public async Task<IActionResult> CompleteRegistrationAsync([FromForm] CompleteManagerRegistrationRequestModel request)
+        {
+            var isSuccessful = await _adminServices.CompleteRegistration(request);
+            if (isSuccessful.Success == false)
+            {
+                return BadRequest(isSuccessful);
+            }
+            return Ok(isSuccessful);
+        }
+        [HttpGet("GetAllAdmins")]
+        public async Task<IActionResult> GetAllAdmins()
+        {
+            var admins = await _adminServices.GetAllAdmins();
+            if (admins.Success == false)
+            {
+                return BadRequest(admins);
+            }
+            return Ok(admins);
+        }
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateAsync([FromForm] UpdateAdminRequestModel model, [FromRoute] int id)
+        {
+            var customer = await _adminServices.UpdateProfile(model, id);
+            if (customer.Success == false)
             {
                 return BadRequest(customer);
             }
             return Ok(customer);
         }
 
-            [HttpGet("Get/{id}")]
-            public async Task<IActionResult> GetAdminAsync([FromRoute] int id)
+        [HttpGet("Get/{id}")]
+        public async Task<IActionResult> GetAdminAsync([FromRoute] int id)
+        {
+            var Admin = await _adminServices.FindAdminAsync(id);
+            if (Admin.Success == false)
             {
-                var Admin = await _adminServices.FindAdminAsync(id);
-                if (Admin.Success == false)
-                {
-                    return BadRequest(Admin);
-                }
-                return Ok(Admin);
+                return BadRequest(Admin);
             }
-            [HttpDelete("Delete/{id}")]
-            public async Task<IActionResult> DeleteAsync([FromRoute] int id)
+            return Ok(Admin);
+        }
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id)
+        {
+            var Admin = await _adminServices.DeleteAdmin(id);
+            if (Admin.Success == false)
             {
-                var Admin = await _adminServices.DeleteAdmin(id);
-                if (Admin.Success == false)
-                {
-                    return BadRequest(Admin);
-                }
-                return Ok(Admin);
+                return BadRequest(Admin);
             }
+            return Ok(Admin);
+        }
     }
 }

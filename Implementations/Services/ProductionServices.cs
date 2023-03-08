@@ -19,17 +19,28 @@ namespace Dansnom.Implementations.Services
         private readonly IProductionRepository _productionRepository;
         private readonly IRawMaterialRepository _rawMaterialRepository;
         private readonly IProductionRawMaterialRepository _productionRawMaterialRepository;
+        private readonly IAdminRepository _adminRepository;
         private readonly IProductServices _productServices;
-        public ProductionServices(IProductionRepository productionRepository, IRawMaterialRepository rawMaterialRepository, IProductRepository productRepository, IProductionRawMaterialRepository productionRawMaterialRepository, IProductServices productServices)
+        public ProductionServices(IProductionRepository productionRepository, IRawMaterialRepository rawMaterialRepository, IProductRepository productRepository, IProductionRawMaterialRepository productionRawMaterialRepository, IProductServices productServices, IAdminRepository adminRepository)
         {
             _productionRepository = productionRepository;
             _rawMaterialRepository = rawMaterialRepository;
             _productRepository = productRepository;
             _productionRawMaterialRepository = productionRawMaterialRepository;
             _productServices = productServices;
+            _adminRepository = adminRepository;
         }
-        public async Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids)
+        public async Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids, int adminId)
         {
+            var admin = await _adminRepository.GetAdminByUserIdAsync(adminId);
+            if (admin == null)
+            {
+                return new BaseResponse
+                {
+                    Message = "Manager not found",
+                    Success = false
+                };
+            }
             var prod = await _productRepository.GetAsync(x => x.Name == model.ProductName && x.IsDeleted == false);
             if (prod == null)
             {
@@ -41,6 +52,7 @@ namespace Dansnom.Implementations.Services
             }
             var production = new Production
             {
+                AdminId = admin.Id,
                 ProductId = prod.Id,
                 QuantityRequest = model.QuantityRequest,
                 QuantityProduced = model.QuantityProduced,
@@ -50,32 +62,65 @@ namespace Dansnom.Implementations.Services
                 ApprovalStatus = ApprovalStatus.Pending
             };
             var prodtions = await _productionRepository.GetAllAsync();
-            foreach (var id in ids)
+            if (prodtions.Count == 0)
             {
-                var raw = await _rawMaterialRepository.GetAsync(id);
+                foreach (var id in ids)
+                {
+                    var raw = await _rawMaterialRepository.GetAsync(id);
 
-                if (raw == null)
-                {
-                    return new BaseResponse
+                    if (raw == null)
                     {
-                        Message = "Raw Material not found",
-                        Success = false
-                    };
-                }
-                if (raw.ApprovalStatus == ApprovalStatus.Pending || raw.ApprovalStatus == ApprovalStatus.Rejected)
-                {
-                    return new BaseResponse
+                        return new BaseResponse
+                        {
+                            Message = "Raw Material not found",
+                            Success = false
+                        };
+                    }
+                    if (raw.ApprovalStatus == ApprovalStatus.Pending || raw.ApprovalStatus == ApprovalStatus.Rejected)
                     {
-                        Message = "Raw Material needs to be aproved",
-                        Success = false
+                        return new BaseResponse
+                        {
+                            Message = "Raw Material needs to be aproved",
+                            Success = false
+                        };
+                    }
+                    var productionRawMaterial = new ProductionRawMaterial
+                    {
+                        RawMaterialId = raw.Id,
+                        ProductionId = prodtions.Count + 1
                     };
+                    production.ProductionRawMaterial.Add(productionRawMaterial);
                 }
-                var productionRawMaterial = new ProductionRawMaterial
+            }
+            else
+            {
+                foreach (var id in ids)
                 {
-                    RawMaterialId = raw.Id,
-                    ProductionId = prodtions[prodtions.Count - 1].Id + 1
-                };
-                production.ProductionRawMaterial.Add(productionRawMaterial);
+                    var raw = await _rawMaterialRepository.GetAsync(id);
+
+                    if (raw == null)
+                    {
+                        return new BaseResponse
+                        {
+                            Message = "Raw Material not found",
+                            Success = false
+                        };
+                    }
+                    if (raw.ApprovalStatus == ApprovalStatus.Pending || raw.ApprovalStatus == ApprovalStatus.Rejected)
+                    {
+                        return new BaseResponse
+                        {
+                            Message = "Raw Material needs to be aproved",
+                            Success = false
+                        };
+                    }
+                    var productionRawMaterial = new ProductionRawMaterial
+                    {
+                        RawMaterialId = raw.Id,
+                        ProductionId = prodtions[prodtions.Count - 1].Id + 1
+                    };
+                    production.ProductionRawMaterial.Add(productionRawMaterial);
+                }
             }
             var prodtion = await _productionRepository.CreateAsync(production);
             await _productionRepository.UpdateAsync(production);
@@ -225,7 +270,7 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = productions.Select(x => new ProductionDto
                 {
-                     ApprovalStatus = x.Production.ApprovalStatus,
+                    ApprovalStatus = x.Production.ApprovalStatus,
                     ProductionDate = x.Production.ProductionDate,
                     QuantityRequest = x.Production.QuantityRequest,
                     QuantityProduced = x.Production.QuantityProduced,
@@ -266,7 +311,7 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = productions.Select(x => new ProductionDto
                 {
-                     ApprovalStatus = x.Production.ApprovalStatus,
+                    ApprovalStatus = x.Production.ApprovalStatus,
                     ProductionDate = x.Production.ProductionDate,
                     QuantityRequest = x.Production.QuantityRequest,
                     QuantityProduced = x.Production.QuantityProduced,
@@ -307,7 +352,7 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = productions.Select(x => new ProductionDto
                 {
-                     ApprovalStatus = x.Production.ApprovalStatus,
+                    ApprovalStatus = x.Production.ApprovalStatus,
                     ProductionDate = x.Production.ProductionDate,
                     QuantityRequest = x.Production.QuantityRequest,
                     QuantityProduced = x.Production.QuantityProduced,
@@ -349,7 +394,7 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = productions.Select(x => new ProductionDto
                 {
-                     ApprovalStatus = x.Production.ApprovalStatus,
+                    ApprovalStatus = x.Production.ApprovalStatus,
                     ProductionDate = x.Production.ProductionDate,
                     QuantityRequest = x.Production.QuantityRequest,
                     QuantityProduced = x.Production.QuantityProduced,
@@ -481,7 +526,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            if(production.ApprovalStatus == ApprovalStatus.Approved)
+            if (production.ApprovalStatus == ApprovalStatus.Approved)
             {
                 return new BaseResponse
                 {
@@ -492,6 +537,7 @@ namespace Dansnom.Implementations.Services
             production.QuantityProduced = model.QuantityProduced;
             production.ProductId = product.Id;
             production.QuantityRemaining = model.QuantityProduced - (production.QuantityProduced - production.QuantityRemaining);
+            production.ApprovalStatus = ApprovalStatus.Pending;
             await _productionRepository.UpdateAsync(production);
             return new BaseResponse
             {

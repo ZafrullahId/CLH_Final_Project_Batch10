@@ -56,32 +56,6 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RawMaterials",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    ApprovalStatus = table.Column<int>(type: "int", nullable: false),
-                    Cost = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    QuantiityBought = table.Column<double>(type: "double", nullable: false),
-                    QuantiityRemaining = table.Column<double>(type: "double", nullable: false),
-                    RequestTime = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    AdditionalMessage = table.Column<string>(type: "text", nullable: true),
-                    CreatedBy = table.Column<int>(type: "int", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
-                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DeletedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RawMaterials", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -143,39 +117,6 @@ namespace Project.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Wallets", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Productions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    ApprovalStatus = table.Column<int>(type: "int", nullable: false),
-                    ProductionDate = table.Column<string>(type: "text", nullable: true),
-                    QuantityRequest = table.Column<double>(type: "double", nullable: false),
-                    QuantityProduced = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    QuantityRemaining = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    RequestTime = table.Column<string>(type: "text", nullable: true),
-                    AdditionalMessage = table.Column<string>(type: "text", nullable: true),
-                    CreatedBy = table.Column<int>(type: "int", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
-                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DeletedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Productions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Productions_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -268,13 +209,16 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionRawMaterials",
+                name: "Chats",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    RawMaterialId = table.Column<int>(type: "int", nullable: false),
-                    ProductionId = table.Column<int>(type: "int", nullable: false),
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Seen = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PostedTime = table.Column<string>(type: "text", nullable: true),
+                    SenderId = table.Column<int>(type: "int", nullable: false),
+                    ReceiverId = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
                     LastModifiedBy = table.Column<int>(type: "int", nullable: false),
@@ -285,17 +229,84 @@ namespace Project.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductionRawMaterials", x => x.Id);
+                    table.PrimaryKey("PK_Chats", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductionRawMaterials_Productions_ProductionId",
-                        column: x => x.ProductionId,
-                        principalTable: "Productions",
+                        name: "FK_Chats_Admins_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Admins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Productions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    AdminId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ApprovalStatus = table.Column<int>(type: "int", nullable: false),
+                    ProductionDate = table.Column<string>(type: "text", nullable: true),
+                    QuantityRequest = table.Column<double>(type: "double", nullable: false),
+                    QuantityProduced = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    QuantityRemaining = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    RequestTime = table.Column<string>(type: "text", nullable: true),
+                    AdditionalMessage = table.Column<string>(type: "text", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Productions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Productions_Admins_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "Admins",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductionRawMaterials_RawMaterials_RawMaterialId",
-                        column: x => x.RawMaterialId,
-                        principalTable: "RawMaterials",
+                        name: "FK_Productions_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RawMaterials",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    AdminId = table.Column<int>(type: "int", nullable: false),
+                    ApprovalStatus = table.Column<int>(type: "int", nullable: false),
+                    Cost = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    QuantiityBought = table.Column<double>(type: "double", nullable: false),
+                    QuantiityRemaining = table.Column<double>(type: "double", nullable: false),
+                    RequestTime = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    AdditionalMessage = table.Column<string>(type: "text", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RawMaterials", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RawMaterials_Admins_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "Admins",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -392,6 +403,39 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductionRawMaterials",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    RawMaterialId = table.Column<int>(type: "int", nullable: false),
+                    ProductionId = table.Column<int>(type: "int", nullable: false),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductionRawMaterials", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductionRawMaterials_Productions_ProductionId",
+                        column: x => x.ProductionId,
+                        principalTable: "Productions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductionRawMaterials_RawMaterials_RawMaterialId",
+                        column: x => x.RawMaterialId,
+                        principalTable: "RawMaterials",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductOrders",
                 columns: table => new
                 {
@@ -465,6 +509,11 @@ namespace Project.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Chats_SenderId",
+                table: "Chats",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Customers_UserId",
                 table: "Customers",
                 column: "UserId",
@@ -491,6 +540,11 @@ namespace Project.Migrations
                 column: "RawMaterialId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Productions_AdminId",
+                table: "Productions",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Productions_ProductId",
                 table: "Productions",
                 column: "ProductId");
@@ -504,6 +558,11 @@ namespace Project.Migrations
                 name: "IX_ProductOrders_ProductId",
                 table: "ProductOrders",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RawMaterials_AdminId",
+                table: "RawMaterials",
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_CustomerId",
@@ -540,7 +599,7 @@ namespace Project.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Admins");
+                name: "Chats");
 
             migrationBuilder.DropTable(
                 name: "ProductionRawMaterials");
@@ -577,6 +636,9 @@ namespace Project.Migrations
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Admins");
 
             migrationBuilder.DropTable(
                 name: "Addresses");

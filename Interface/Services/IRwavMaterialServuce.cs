@@ -12,7 +12,7 @@ namespace Dansnom.Interface.Services
         Task<RawMaterialsResponseModel> GetAllPendingRawMaterial();
         Task<RawMaterialResponseModel> CalculateRawMaterialCostForThYear();
         Task<RawMaterialResponseModel> CalculateRawMaterialCostForTheMonth();
-        Task<BaseResponse> CreateRawMaterial(CreateRawMaterialRequestModel model);
+        Task<BaseResponse> CreateRawMaterial(CreateRawMaterialRequestModel model,int id);
         Task<RawMaterialsResponseModel> GetAllApprovedRawMaterialAsync();
         Task<RawMaterialsResponseModel> GetAllAprovedRawMateralsForTheYear(int year);
         Task<BaseResponse> RejectRawMaterialAsync(int id,RejectRequestRequestModel model);

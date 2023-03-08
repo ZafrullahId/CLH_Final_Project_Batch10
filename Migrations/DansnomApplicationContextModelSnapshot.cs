@@ -105,6 +105,55 @@ namespace Project.Migrations
                     b.ToTable("Admins");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Chat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostedTime")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Seen")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -419,6 +468,9 @@ namespace Project.Migrations
                     b.Property<string>("AdditionalMessage")
                         .HasColumnType("text");
 
+                    b.Property<int>("AdminId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ApprovalStatus")
                         .HasColumnType("int");
 
@@ -462,6 +514,8 @@ namespace Project.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
 
                     b.HasIndex("ProductId");
 
@@ -519,6 +573,9 @@ namespace Project.Migrations
                     b.Property<string>("AdditionalMessage")
                         .HasColumnType("text");
 
+                    b.Property<int>("AdminId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ApprovalStatus")
                         .HasColumnType("int");
 
@@ -559,6 +616,8 @@ namespace Project.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
 
                     b.ToTable("RawMaterials");
                 });
@@ -741,6 +800,17 @@ namespace Project.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Chat", b =>
+                {
+                    b.HasOne("Dansnom.Entities.Admin", "Sender")
+                        .WithMany("Chats")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Customer", b =>
                 {
                     b.HasOne("Dansnom.Entities.Identity.User", "User")
@@ -811,11 +881,19 @@ namespace Project.Migrations
 
             modelBuilder.Entity("Dansnom.Entities.Production", b =>
                 {
+                    b.HasOne("Dansnom.Entities.Admin", "Admin")
+                        .WithMany("Production")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Dansnom.Entities.Product", "Product")
                         .WithMany("Production")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Admin");
 
                     b.Navigation("Product");
                 });
@@ -837,6 +915,17 @@ namespace Project.Migrations
                     b.Navigation("Production");
 
                     b.Navigation("RawMaterial");
+                });
+
+            modelBuilder.Entity("Dansnom.Entities.RawMaterial", b =>
+                {
+                    b.HasOne("Dansnom.Entities.Admin", "Admin")
+                        .WithMany("RawMaterial")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.Review", b =>
@@ -878,6 +967,15 @@ namespace Project.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Dansnom.Entities.Admin", b =>
+                {
+                    b.Navigation("Chats");
+
+                    b.Navigation("Production");
+
+                    b.Navigation("RawMaterial");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.Customer", b =>

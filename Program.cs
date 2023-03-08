@@ -13,6 +13,9 @@ namespace Project
     {
         public static void Main(string[] args)
         {
+            // int a = 2;
+            // string text = string.Format("I'm a c# .NET Developer with {0} year experience",a);
+            // Console.WriteLine(text);
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

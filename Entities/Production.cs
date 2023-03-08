@@ -7,6 +7,8 @@ namespace Dansnom.Entities
  {
       public class Production : AuditableEntity
     {
+         public int AdminId { get; set; }
+        public Admin Admin { get; set; }
         public int ProductId { get; set; }
         public Product Product { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; }

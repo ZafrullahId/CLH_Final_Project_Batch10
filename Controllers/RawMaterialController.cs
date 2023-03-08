@@ -18,10 +18,10 @@ namespace Project.Controllers
         {
             _rawMaterialServuce = rwavMaterialServuce;
         }
-        [HttpPost("CreateRawMaterial")]
-        public async Task<IActionResult> CreateAsync([FromForm] CreateRawMaterialRequestModel model)
+        [HttpPost("CreateRawMaterial/{managerId}")]
+        public async Task<IActionResult> CreateAsync([FromForm] CreateRawMaterialRequestModel model,[FromRoute]int managerId)
         {
-            var RawMaterial = await _rawMaterialServuce.CreateRawMaterial(model);
+            var RawMaterial = await _rawMaterialServuce.CreateRawMaterial(model,managerId);
             if (RawMaterial.Success == false)
             {
                 return BadRequest(RawMaterial);

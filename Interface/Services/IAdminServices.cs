@@ -11,6 +11,6 @@ namespace Dansnom.Interface.Services
         Task<AdminResponseModel> FindAdminAsync(int id);
         Task<AdminsResponseModel> GetAllAdmins();
         Task<AdminResponseModel> UpdateProfile(UpdateAdminRequestModel model, int id);
-        Task<BaseResponse> CompleteRegistration(CreateAdminRequestModel model);
+        Task<BaseResponse> CompleteRegistration(CompleteManagerRegistrationRequestModel model);
     }
 }

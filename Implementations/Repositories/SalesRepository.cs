@@ -47,8 +47,10 @@ namespace Dansnom.Implementations.Repositories
        public async Task<List<Sales>> GetSalesForTheYearAsync(int id,int year)
         {
              return await _Context.Sales
+            .Include(x => x.Order.Address)
             .Include(x => x.Order)
-            .Include(x => x.Product)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(x => x.User)
             .Where(c => c.ProductId == id && c.CreatedOn.Year == year)
             .ToListAsync();
         }

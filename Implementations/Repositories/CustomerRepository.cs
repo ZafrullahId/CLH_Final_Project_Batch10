@@ -22,7 +22,7 @@ namespace Dansnom.Implementations.Repositories
         public async Task<Customer> GetCustomerByUserIdAsync(int id)
         {
             return await _Context.Customers
-            .Where(x => x.UserId == id && x.User.IsDeleted == false)
+            .Where(x => x.User.Id == id && x.User.IsDeleted == false)
             .Include(x => x.User).SingleOrDefaultAsync();
         }
         public async Task<Customer> GetCustomerByIdAsync(int id)

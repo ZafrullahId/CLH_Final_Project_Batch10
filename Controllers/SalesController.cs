@@ -118,6 +118,16 @@ namespace Project.Controllers
             }
             return Ok(sales);
         }
+        [HttpGet("GetSalesByProductNameForTheYear/{productId}/{year}")]
+        public async Task<IActionResult> GetSalesByProductNameForTheYearAsync(int productId, int year)
+        {
+            var sales = await _salesServices.GetSalesByProductNameForTheYear(productId,year);
+            if (sales.Success == false)
+            {
+                return BadRequest(sales);
+            }
+            return Ok(sales);
+        }
         [HttpGet("CalculateAllMonthlySales/{year}")]
         public async Task<IActionResult> CalculateAllMonthlySalesAsync(int year)
         {
@@ -132,6 +142,16 @@ namespace Project.Controllers
         public async Task<IActionResult> CalculateAllMonthlyRawMaterialAsync(int year)
         {
             var rawMaterials = await _salesServices.CalculateAllMonthlyRawMaterialAsync(year);
+            if (rawMaterials.Success == false)
+            {
+                return BadRequest(rawMaterials);
+            }
+            return Ok(rawMaterials);           
+        }
+        [HttpGet("CalculateNetProfit/{month}/{year}/{extraExpenses}")]
+        public async Task<IActionResult> CalculateNetProfitAsync(int month,int year,[FromRoute]decimal extraExpenses)
+        {
+            var rawMaterials = await _salesServices.CalculateNetProfitAsync(year,month,extraExpenses);
             if (rawMaterials.Success == false)
             {
                 return BadRequest(rawMaterials);

@@ -17,16 +17,28 @@ namespace Dansnom.Implementations.Services
         private readonly IRawMaterialRepository _rawMaterialRepository;
         private readonly IProductRepository _productRepository;
         private readonly IProductionRawMaterialRepository _productionRawMaterialRepository;
-        public RawMaterialServices(IRawMaterialRepository rawMaterialRepository, IProductRepository productionRepository, IProductionRawMaterialRepository productionRawMaterialRepository)
+        private readonly IAdminRepository _adminRepository;
+        public RawMaterialServices(IRawMaterialRepository rawMaterialRepository, IProductRepository productionRepository, IProductionRawMaterialRepository productionRawMaterialRepository,IAdminRepository adminRepository)
         {
             _rawMaterialRepository = rawMaterialRepository;
             _productRepository = productionRepository;
             _productionRawMaterialRepository = productionRawMaterialRepository;
+            _adminRepository = adminRepository;
         }
-        public async Task<BaseResponse> CreateRawMaterial(CreateRawMaterialRequestModel model)
+        public async Task<BaseResponse> CreateRawMaterial(CreateRawMaterialRequestModel model,int id)
         {
+            var admin = await _adminRepository.GetAdminByUserIdAsync(id);
+            if (admin == null)
+            {
+                return new BaseResponse
+                {
+                    Message = "Manager not found",
+                    Success = false
+                };
+            }
             var rawMaterial = new RawMaterial
             {
+                AdminId = admin.Id,
                 QuantiityBought = model.QuantiityBought,
                 QuantiityRemaining = model.QuantiityBought,
                 Cost = model.Cost,
@@ -89,7 +101,12 @@ namespace Dansnom.Implementations.Services
                     QuantiityRemaining = x.QuantiityRemaining,
                     Name = x.Name,
                     AdditionalMessage = x.AdditionalMessage,
-                    PostedTime = x.RequestTime
+                    PostedTime = x.RequestTime,
+                    EnumApprovalStatus = x.ApprovalStatus,
+                    StringApprovalStatus = x.ApprovalStatus.ToString(),
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
 
                 }).ToList()
             };
@@ -140,7 +157,12 @@ namespace Dansnom.Implementations.Services
                     QuantiityRemaining = x.QuantiityRemaining,
                     Name = x.Name,
                     AdditionalMessage = x.AdditionalMessage,
-                    PostedTime = x.RequestTime
+                    PostedTime = x.RequestTime,
+                    EnumApprovalStatus = x.ApprovalStatus,
+                    StringApprovalStatus = x.ApprovalStatus.ToString(),
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
                 }).ToList()
             };
         }
@@ -193,7 +215,9 @@ namespace Dansnom.Implementations.Services
                     PostedTime = x.RequestTime,
                     EnumApprovalStatus = x.ApprovalStatus,
                     StringApprovalStatus = x.ApprovalStatus.ToString(),
-                    CreatedTime = x.CreatedOn.ToLongDateString()
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
                 }).ToList()
             };
         }
@@ -243,7 +267,12 @@ namespace Dansnom.Implementations.Services
                     QuantiityRemaining = x.QuantiityRemaining,
                     Name = x.Name,
                     AdditionalMessage = x.AdditionalMessage,
-                    PostedTime = x.RequestTime
+                    PostedTime = x.RequestTime,
+                    EnumApprovalStatus = x.ApprovalStatus,
+                    StringApprovalStatus = x.ApprovalStatus.ToString(),
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
                 }).ToList()
             };
         }
@@ -254,7 +283,7 @@ namespace Dansnom.Implementations.Services
             {
                 return new RawMaterialsResponseModel
                 {
-                    Message = $"No Unapproved raw materials for the year {month}",
+                    Message = $"No Unapproved raw materials for the month {month}",
                     Success = false
                 };
             }
@@ -294,7 +323,12 @@ namespace Dansnom.Implementations.Services
                     QuantiityRemaining = x.QuantiityRemaining,
                     Name = x.Name,
                     AdditionalMessage = x.AdditionalMessage,
-                    PostedTime = x.RequestTime
+                    PostedTime = x.RequestTime,
+                    EnumApprovalStatus = x.ApprovalStatus,
+                    StringApprovalStatus = x.ApprovalStatus.ToString(),
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
 
                 }).ToList()
             };
@@ -350,7 +384,9 @@ namespace Dansnom.Implementations.Services
                     PostedTime = x.RequestTime,
                     EnumApprovalStatus = x.ApprovalStatus,
                     StringApprovalStatus = x.ApprovalStatus.ToString(),
-                    CreatedTime = x.CreatedOn.ToLongDateString()
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
                 }).ToList()
             };
         }
@@ -405,7 +441,10 @@ namespace Dansnom.Implementations.Services
                     PostedTime = x.RequestTime,
                     StringApprovalStatus = x.ApprovalStatus.ToString(),
                     EnumApprovalStatus = x.ApprovalStatus,
-                    CreatedTime = x.CreatedOn.ToLongDateString()
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
+                    ManagerImage = x.Admin.User.ProfileImage,
+                    ManagerName = x.Admin.User.Username,
+                    // ManagerRole = x.Admin.User.
                 }).ToList()
             };
         }
@@ -435,6 +474,7 @@ namespace Dansnom.Implementations.Services
                     AdditionalMessage = raw.AdditionalMessage,
                     PostedTime = raw.RequestTime,
                     EnumApprovalStatus = raw.ApprovalStatus
+                    
                 }
             };
         }

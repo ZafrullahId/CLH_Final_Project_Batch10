@@ -39,17 +39,31 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            var productions = await _productionRepository.GetAllAsync();
+            var productions = await _productionRepository.GetAllApprovedProduction();
             bool isRemaining = false;
+            decimal quantityOrdered = model.QuantityBought;
             foreach (var item in productions)
             {
                 var production = await _productionRepository.GetProduction(item.Id, Productid);
-                if (production != null && production.QuantityRemaining >= model.QuantityBought)
+                if (production != null && production.QuantityRemaining > 0 && quantityOrdered > production.QuantityRemaining)
+                {
+                    quantityOrdered -= production.QuantityRemaining;
+                    production.QuantityRemaining = 0;
+                }
+                else if (production != null && production.QuantityRemaining >= quantityOrdered)
+                {
+                    production.QuantityRemaining -= (int)quantityOrdered;
+                    quantityOrdered = 0;
+                }
+                if(quantityOrdered == 0)
                 {
                     isRemaining = true;
-                    production.QuantityRemaining -= (int)model.QuantityBought;
                     await _productionRepository.UpdateAsync(production);
                     break;
+                }
+                else
+                {
+                    isRemaining = false;
                 }
                 continue;
             }

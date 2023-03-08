@@ -58,7 +58,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<UsersResponseModel> GetUsersByRoleAsync(string role)
         {
-            var users = await _userRepository.GetUserByRoleAsync(role);
+            var users = await _userRepository.GetUserByRoleAsync(role.ToLower());
             if (users.Count == 0)
             {
                 return new UsersResponseModel

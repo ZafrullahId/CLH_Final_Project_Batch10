@@ -26,8 +26,9 @@ namespace Dansnom.Implementations.Repositories
         public async Task<List<UserRole>> GetUserByRoleAsync(string role)
         {
             return await _Context.UserRoles
-            .Where(x => x.Role.Name == role)
-            .Include(c => c.User).Include(c => c.Role)
+            .Where(x => x.Role.Name == role && x.Role.IsDeleted == false && x.User.IsDeleted == false)
+            .Include(c => c.User)
+            .Include(c => c.Role)
             .ToListAsync();
         }
     } 

@@ -88,6 +88,9 @@ namespace Project
             services.AddScoped<IWalletServices, WalletServices>();
             services.AddScoped<IWalletRepository, WalletRepository>();
 
+            services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IChatService, ChatService>();
+
             services.AddScoped<IverificationCodeRepository,VarificationCodeRepository>();
 
             services.AddScoped<IProductionRawMaterialRepository,ProductionRawMaterialRepository>();

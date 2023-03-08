@@ -18,10 +18,10 @@ namespace Project.Controllers
         {
             _productionServices = productionServices;
         }
-        [HttpPost("CreateProduction")]
-        public async Task<IActionResult> CreateAsync([FromForm]CreateProductionRequestModel model,[FromQuery]List<int> ids)
+        [HttpPost("CreateProduction/{id}")]
+        public async Task<IActionResult> CreateAsync([FromForm]CreateProductionRequestModel model,[FromQuery]List<int> ids,[FromRoute]int id)
         {
-            var production = await _productionServices.CreateProductionAsync(model,ids);
+            var production = await _productionServices.CreateProductionAsync(model,ids,id);
             if (production.Success == false)
             {
                 return BadRequest(production);

@@ -341,6 +341,7 @@ namespace Dansnom.Implementations.Services
                     },
                     Product = new Product
                     {
+                        Id = item.Id,
                         Name = item.Name,
                         ImageUrl = item.ImageUrl
                     }
@@ -357,6 +358,7 @@ namespace Dansnom.Implementations.Services
                     QuantityBought = x.Order.QuantityBought,
                     ProductDto = new ProductDto
                     {
+                        ProductId = x.Product.Id,
                         Name = x.Product.Name,
                         ImageUrl = x.Product.ImageUrl
                     }
@@ -365,15 +367,6 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<ProfitResponseModel> CalculateThisMonthProfitAsync()
         {
-            // var products = await _productRepository.GetAllAsync();
-            // if (products.Count == 0)
-            // {
-            //     return new ProfitResponseModel
-            //     {
-            //         Message = "No products yet",
-            //         Success = false
-            //     };
-            // }
             var rawMaterial = await _ramMaterialRepository.GetSumOfAprovedRawMaterialForTheMonthAsync();
             var sales = await _salesRepository.GetTotalMonthlySalesAsync();
             return new ProfitResponseModel
@@ -579,6 +572,64 @@ namespace Dansnom.Implementations.Services
                         ImageUrl = x.Order.Customer.User.ProfileImage,
                     }
                 }).ToList()
+            };
+        }
+        public async Task<SalesResponseModel> GetSalesByProductNameForTheYear(int productId,int year)
+        {
+            var prdct = await _productRepository.GetAsync(productId);
+            if (prdct == null)
+            {
+                return new SalesResponseModel
+                {
+                    Message = "Product not found",
+                    Success = false
+                };
+            }
+            var sales = await _salesRepository.GetSalesForTheYearAsync(prdct.Id, year);
+            if (sales.Count == 0)
+            {
+                return new SalesResponseModel
+                {
+                    Message = $"No sales found for {prdct.Name}",
+                    Success = false
+                };
+            }
+            return new SalesResponseModel
+            {
+                Message = "Sales found successfully",
+                Success = true,
+                Data = sales.Select(x => new SalesDto
+                {
+                    QuantityBought = x.Order.QuantityBought,
+                    AmountPaid = x.AmountPaid,
+                    AddressId = x.Order.AddressId,
+                    OrderedDate = x.Order.CreatedOn.ToLongDateString(),
+                    DeliveredDate = x.CreatedOn.ToLongDateString(),
+                    CustomerDto = new CustomerDto
+                    {
+                        FullName = x.Order.Customer.FullName,
+                        PhoneNumber = x.Order.Customer.PhoneNumber,
+                        ImageUrl = x.Order.Customer.User.ProfileImage,
+                    },
+                    ProductDto = new ProductDto
+                    {
+                        ProductId = prdct.Id
+                    }
+                }).ToList()
+            };
+        }
+        public async Task<ProfitResponseModel> CalculateNetProfitAsync(int year, int month, decimal extraExpenses)
+        {
+            var expense = await _ramMaterialRepository.GetSumOfAprovedRawMaterialForTheMonthAsync(month,year);
+            var sales = await _salesRepository.GetTotalMonthlySalesAsync(month,year);
+            return new ProfitResponseModel
+            {
+                Message = "Net profit calculated successfully",
+                Success = true,
+                Data = new ProfitDto
+                {
+                    Profit = sales - (expense + extraExpenses)
+                }
             };
         }
     }

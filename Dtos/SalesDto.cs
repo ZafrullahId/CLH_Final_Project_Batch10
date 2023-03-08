@@ -10,5 +10,6 @@ namespace Dansnom.Dtos
         public CustomerDto CustomerDto { get; set; }
         public string OrderedDate { get; set; }
         public string DeliveredDate { get; set; }
+        public int AddressId { get; set; }
     }
 }

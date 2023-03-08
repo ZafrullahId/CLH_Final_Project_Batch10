@@ -10,7 +10,7 @@ namespace Dansnom.Interface.Services
     {
         Task<BaseResponse> AproveProduction(int id);
         Task<BaseResponse> RejectProduction(int id);
-        Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids);
+        Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids,int adminId);
         Task<ProductionsResponseModel> GetAllPendingProductionsAsync();
         Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int month);
         Task<ProductionsResponseModel> GetAllAprovedProductionsByYearAsync(int year);

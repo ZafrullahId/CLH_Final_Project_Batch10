@@ -140,7 +140,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            else if ((DateTime.Now - code.CreatedOn ).TotalSeconds > 60)
+            else if ((DateTime.Now - code.CreatedOn ).TotalSeconds > 100)
             {
                 return new BaseResponse
                 {

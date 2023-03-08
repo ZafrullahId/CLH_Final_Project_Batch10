@@ -10,6 +10,7 @@ using Dansnom.Entities;
 using Dansnom.Entities.Identity;
 using Dansnom.Interface.Repositories;
 using Dansnom.Interface.Services;
+using DansnomEmailServices;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Dansnom.Implementations.Services
@@ -21,12 +22,14 @@ namespace Dansnom.Implementations.Services
         private readonly IAdminRepository _adminRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IRoleRepository _roleRepository;
-        public AdminServices(IUserRepository userRepository, IAdminRepository adminRepository, IWebHostEnvironment webHostEnvironment, IRoleRepository roleRepository)
+        private readonly IMailServices _mailService;
+        public AdminServices(IUserRepository userRepository, IAdminRepository adminRepository, IWebHostEnvironment webHostEnvironment, IRoleRepository roleRepository, IMailServices mailService)
         {
             _roleRepository = roleRepository;
             _userRepository = userRepository;
             _adminRepository = adminRepository;
             _webHostEnvironment = webHostEnvironment;
+            _mailService = mailService;
         }
 
         public async Task<BaseResponse> AddAdmin(CreateAdminRequestModel model)
@@ -40,32 +43,22 @@ namespace Dansnom.Implementations.Services
                     Success = false,
                 };
             }
-
-            var imageName = "";
-            if (model.profileImage != null)
+            var manager = await _adminRepository.GetAdminByRoleAsync(model.Role);
+            if (manager != null)
             {
-                var imgPath = _webHostEnvironment.WebRootPath;
-                var imagePath = Path.Combine(imgPath, "Images");
-                Directory.CreateDirectory(imagePath);
-                var imageType = model.profileImage.ContentType.Split('/')[1];
-                imageName = $"{Guid.NewGuid()}.{imageType}";
-                var fullPath = Path.Combine(imagePath, imageName);
-                using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                return new BaseResponse
                 {
-                    model.profileImage.CopyTo(fileStream);
-                }
+                    Message = $"can't add a new manager with this role because the former {model.Role} is still active on the system",
+                    Success = false
+                };
             }
             var user = new User
             {
-                Username = model.Username,
-                ProfileImage = imageName,
                 Email = model.Email,
-                Password = model.Password,
+                IsDeleted = true
             };
             var adduser = await _userRepository.CreateAsync(user);
-
-            var role = await _roleRepository.GetAsync(x => x.Name == model.Role);
-            // var roles = await _roleRepository.GetAllAsync();
+            var role = await _roleRepository.GetAsync(x => x.Name.ToLower() == model.Role.ToLower());
             if (role == null)
             {
                 return new BaseResponse
@@ -88,11 +81,17 @@ namespace Dansnom.Implementations.Services
             {
                 UserId = adduser.Id,
                 User = adduser,
-                FullName = model.FullName,
-                PhoneNumber = model.PhoneNumber,
                 IsDeleted = false,
             };
             var addAdmin = await _adminRepository.CreateAsync(admins);
+             var mailRequest = new MailRequest
+            {
+                Subject = "Complete Your Registration",
+                ToEmail = user.Email,
+                ToName = model.FullName,
+                HtmlContent = $"<html><body><h1>Hello {model.FullName}, Welcome to Dansnom Farm Limited.</h1><h4>Your email has been registered with Dansnom but your registration is not yet complete.</h4><h5>To complete your registration click <a href=\"http://127.0.0.1:5500/AdminFrontEnd/completeRegistration.html?email={model.Email}\">here</a></h5></body></html>",
+            };
+            _mailService.SendEMailAsync(mailRequest);
             return new BaseResponse
             {
                 Message = "Admin Added Successfully",
@@ -101,9 +100,9 @@ namespace Dansnom.Implementations.Services
 
         }
 
-        public async Task<BaseResponse> CompleteRegistration(CreateAdminRequestModel model)
+        public async Task<BaseResponse> CompleteRegistration(CompleteManagerRegistrationRequestModel model)
         {
-            var admin = await _adminRepository.GetAsync(a => a.User.Email == model.Email);
+            var admin = await _adminRepository.GetAdminByEmailAsync(model.Email);
             if (admin == null)
             {
                 return new BaseResponse
@@ -113,17 +112,17 @@ namespace Dansnom.Implementations.Services
                 };
             }
             var imageName = "";
-            if (model.profileImage != null)
+            if (model.ProfileImage != null)
             {
                 var imgPath = _webHostEnvironment.WebRootPath;
                 var imagePath = Path.Combine(imgPath, "Images");
                 Directory.CreateDirectory(imagePath);
-                var imageType = model.profileImage.ContentType.Split('/')[1];
+                var imageType = model.ProfileImage.ContentType.Split('/')[1];
                 imageName = $"{Guid.NewGuid()}.{imageType}";
                 var fullPath = Path.Combine(imagePath, imageName);
                 using (var fileStream = new FileStream(fullPath, FileMode.Create))
                 {
-                    model.profileImage.CopyTo(fileStream);
+                    model.ProfileImage.CopyTo(fileStream);
                 }
             }
 
@@ -132,6 +131,8 @@ namespace Dansnom.Implementations.Services
             admin.User.Email = model.Email ?? admin.User.Email;
             admin.PhoneNumber = model.PhoneNumber ?? admin.PhoneNumber;
             admin.User.ProfileImage = imageName;
+            admin.User.IsDeleted = false;
+            admin.User.Password = model.Password;
             var admin1 = await _adminRepository.UpdateAsync(admin);
 
             return new BaseResponse
@@ -144,7 +145,7 @@ namespace Dansnom.Implementations.Services
 
         public async Task<BaseResponse> DeleteAdmin(int Id)
         {
-            var admin = await _adminRepository.GetAsync(admins => admins.IsDeleted == false && admins.Id == Id);
+            var admin = await _adminRepository.GetAdminByUserIdAsync(Id);
             if (admin == null)
             {
                 return new BaseResponse
@@ -154,7 +155,7 @@ namespace Dansnom.Implementations.Services
                 };
             }
 
-            admin.IsDeleted = true;
+            admin.User.IsDeleted = true;
             await _adminRepository.UpdateAsync(admin);
             return new BaseResponse
             {
@@ -180,7 +181,7 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = admins.Select(x => new AdminDto
                 {
-                    Id = x.Id,
+                    Id = x.User.Id,
                     Username = x.User.Username,
                     FullName = x.User.Admin.FullName,
                     PhoneNumber = x.User.Admin.PhoneNumber,
@@ -188,12 +189,13 @@ namespace Dansnom.Implementations.Services
                     Email = x.User.Email,
                     Role = x.Role.Name,
                     Description = x.Role.Description
+                    // ❄️
                 }).ToList()
             };
         }
         public async Task<AdminResponseModel> FindAdminAsync(int id)
         {
-            var admin = await _adminRepository.GetAdminAsync(id);
+            var admin = await _adminRepository.GetAdminByUserIdAsync(id);
             if (admin == null)
             {
                 return new AdminResponseModel
@@ -219,7 +221,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<AdminResponseModel> UpdateProfile(UpdateAdminRequestModel model, int id)
         {
-            var admin = await _adminRepository.GetAdminAsync(id);
+            var admin = await _adminRepository.GetAdminByUserIdAsync(id);
             if (admin == null)
             {
                 return new AdminResponseModel

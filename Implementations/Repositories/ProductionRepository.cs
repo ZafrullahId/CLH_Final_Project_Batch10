@@ -38,6 +38,13 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.Productions.SingleOrDefaultAsync(x => x.Id == id && x.ProductId == productId);
         }
+
+        public async Task<List<Production>> GetAllApprovedProduction()
+        {
+            return await _Context.Productions
+            .Where(x => x.ApprovalStatus == ApprovalStatus.Approved)
+            .ToListAsync();
+        }
          
     } 
 }

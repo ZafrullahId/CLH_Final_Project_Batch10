@@ -15,5 +15,8 @@ namespace Dansnom.Dtos
         public ApprovalStatus EnumApprovalStatus { get; set; }
         public string StringApprovalStatus { get; set; }
         public string CreatedTime { get; set; }
+        public string ManagerImage { get; set; }
+        public string ManagerName { get; set; }
+        public string ManagerRole { get; set; }
     }
 }
