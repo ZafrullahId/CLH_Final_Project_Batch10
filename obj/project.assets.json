@@ -8253,24 +8253,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Zafrullah\\.nuget\\packages\\": {}
+    "C:\\Users\\zafru\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Zafrullah\\Desktop\\Project\\Project.csproj",
+      "projectUniqueName": "C:\\Users\\zafru\\OneDrive\\Desktop\\CLH_Final_Project_Batch10\\Project.csproj",
       "projectName": "Project",
-      "projectPath": "C:\\Users\\Zafrullah\\Desktop\\Project\\Project.csproj",
-      "packagesPath": "C:\\Users\\Zafrullah\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Zafrullah\\Desktop\\Project\\obj\\",
+      "projectPath": "C:\\Users\\zafru\\OneDrive\\Desktop\\CLH_Final_Project_Batch10\\Project.csproj",
+      "packagesPath": "C:\\Users\\zafru\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\zafru\\OneDrive\\Desktop\\CLH_Final_Project_Batch10\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Zafrullah\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\zafru\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net5.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

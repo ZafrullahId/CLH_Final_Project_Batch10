@@ -91,6 +91,9 @@ namespace Project
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IChatService, ChatService>();
 
+            services.AddScoped<ILikeRepository,LikeRepository>();
+            services.AddScoped<ILikeService,LikeService>();
+
             services.AddScoped<IverificationCodeRepository,VarificationCodeRepository>();
 
             services.AddScoped<IProductionRawMaterialRepository,ProductionRawMaterialRepository>();

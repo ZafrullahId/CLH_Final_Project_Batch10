@@ -18,6 +18,7 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.Reviews
             .Where(x => x.CustomerId == id)
+            .Include(x => x.Likes)
             .Include(x => x.Customer)
             .ThenInclude(x => x.User)
             .Where(x => x.IsDeleted == false)

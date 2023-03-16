@@ -322,6 +322,48 @@ namespace Project.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Like", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -841,6 +883,25 @@ namespace Project.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Like", b =>
+                {
+                    b.HasOne("Dansnom.Entities.Review", "Review")
+                        .WithMany("Likes")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Dansnom.Entities.Identity.User", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Order", b =>
                 {
                     b.HasOne("Dansnom.Entities.Address", "Address")
@@ -996,6 +1057,8 @@ namespace Project.Migrations
 
                     b.Navigation("Customer");
 
+                    b.Navigation("Likes");
+
                     b.Navigation("UserRoles");
                 });
 
@@ -1023,6 +1086,11 @@ namespace Project.Migrations
             modelBuilder.Entity("Dansnom.Entities.RawMaterial", b =>
                 {
                     b.Navigation("ProductionRawMaterial");
+                });
+
+            modelBuilder.Entity("Dansnom.Entities.Review", b =>
+                {
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

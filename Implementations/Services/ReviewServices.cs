@@ -105,7 +105,7 @@ namespace Dansnom.Implementations.Services
         public async Task<ReviewsResponseModel> GetAllReviewsAsync()
         {
             var review = await _reviewRepository.GetAllReviewsAsync();
-            if (review == null)
+            if (review.Count == 0)
             {
                 return new ReviewsResponseModel
                 {

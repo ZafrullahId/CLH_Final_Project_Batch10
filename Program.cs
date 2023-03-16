@@ -16,7 +16,14 @@ namespace Project
             // int a = 2;
             // string text = string.Format("I'm a c# .NET Developer with {0} year experience",a);
             // Console.WriteLine(text);
+            // char a = 'a';
+            // Console.WriteLine((int)a);
             CreateHostBuilder(args).Build().Run();
+            // for (int i = 97; i < 123; i++)
+            // {
+            //     Console.WriteLine((char)i);
+            // }
+            
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)

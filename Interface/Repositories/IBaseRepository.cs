@@ -8,7 +8,7 @@ namespace Dansnom.Interface.Repositories
     public interface IBaseRepository<T>
     {
         Task<T> CreateAsync(T entity);
-         Task SaveChangesAsync();
+        Task SaveChangesAsync();
         Task<bool> DeleteAsync(T entity);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> expression);
         Task<List<T>> GetAllAsync();

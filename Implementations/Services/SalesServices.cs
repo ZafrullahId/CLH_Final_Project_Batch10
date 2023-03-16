@@ -317,7 +317,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<SalesResponseModel> GetSalesForTheYearOnEachProduct(int year)
         {
-            var prod = await _productRepository.GetAllAsync();
+            var prod = await _productRepository.GetAllProductsAsync();
             if (prod == null)
             {
                 return new SalesResponseModel
