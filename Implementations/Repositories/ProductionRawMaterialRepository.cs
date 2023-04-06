@@ -84,15 +84,6 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.Production.ApprovalStatus == ApprovalStatus.Pending)
             .ToListAsync();
         }
-        public async Task<List<ProductionRawMaterial>> GetProductionsByDate(string date)
-        {
-           return await _Context.ProductionRawMaterials
-            .Include(x => x.RawMaterial)
-            .Include(c => c.Production)
-            .ThenInclude(c => c.Product)
-            .Where(x => x.Production.ProductionDate == date)
-            .ToListAsync();
-        }
          public async Task<List<ProductionRawMaterial>> GetProductionsByProductId(int id)
         {
             return await _Context.ProductionRawMaterials
@@ -107,8 +98,16 @@ namespace Dansnom.Implementations.Repositories
             return await _Context.ProductionRawMaterials
             .Include(x => x.RawMaterial)
             .Include(c => c.Production)
+            .ThenInclude(x => x.Admin)
             .Where(x => x.ProductionId == id)
             .ToListAsync();
+        }
+        public async Task<List<ProductionRawMaterial>> GetProductionsByRawMaterialIdAsync(int id)
+        {
+            return await _Context.ProductionRawMaterials
+            .Include(c => c.Production)
+            .ThenInclude(c => c.Product)
+            .Where(x => x.RawMaterialId == id && x.Production.ApprovalStatus == ApprovalStatus.Approved).ToListAsync();
         }
     }
 }

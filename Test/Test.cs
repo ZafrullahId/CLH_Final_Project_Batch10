@@ -1,10 +1,11 @@
 namespace Dansnom.Test
 {
-    public class Test1 
+    public abstract class Test1 
     {
         public int Id { get; set; }
         protected string Name { get; set; }
         public string Email { get; set; }
+        public abstract void Get(int id);
     }
 
 
@@ -19,6 +20,11 @@ namespace Dansnom.Test
                 Email = "hyuewe"
             };
        }
+
+        public override void Get(int id)
+        {
+            throw new System.NotImplementedException();
+        }
     }   
 
 } 

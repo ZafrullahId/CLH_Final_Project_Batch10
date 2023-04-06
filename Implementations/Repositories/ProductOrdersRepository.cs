@@ -14,25 +14,81 @@ namespace Dansnom.Implementations.Repositories
         {
             _Context = Context;
         }
-        public async Task<List<ProductOrders>> GetAllOrders()
+        public async Task<List<ProductOrders>> GetOrdersByIdAsync(int id)
         {
             return await _Context.ProductOrders
-            .Include(c => c.Product)
-            .Include(c => c.Order)
-            .Include(c => c.Order.Customer)
-            .Include(c => c.Order.Address)
-            .Where(c => c.Order.isDelivered == false)
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.OrderId == id)
             .ToListAsync();
         }
-        public async Task<ProductOrders> GetOrderById(int id)
+        public async Task<List<ProductOrders>> GetOrderByCustomerIdAsync(int id)
         {
             return await _Context.ProductOrders
-            .Include(c => c.Product)
-            .Include(c => c.Order)
-            .Include(c => c.Order.Customer)
-            .Include(c => c.Order.Address)
-            .Where(c => c.OrderId == id)
-            .SingleOrDefaultAsync();
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.Order.CustomerId == id)
+            .ToListAsync();
+        }
+        public async Task<List<ProductOrders>> GetAllOrderAsync()
+        {
+            return await _Context.ProductOrders
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .ToListAsync();
+        }
+        public async Task<List<ProductOrders>> GetAllDeleveredOrderByProductIdForTheMonthAsync(int id,int month,int year)
+        {
+            return await _Context.ProductOrders
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.Order.isDelivered == true && x.ProductId == id && x.Order.LastModifiedOn.Month == month && x.Order.LastModifiedOn.Year == year)
+            .ToListAsync();
+        }
+        public async Task<List<ProductOrders>> GetAllDeleveredOrderByProductIdForTheYearAsync(int id,int year)
+        {
+            return await _Context.ProductOrders
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.Order.isDelivered == true && x.ProductId == id && x.Order.LastModifiedOn.Year == year)
+            .ToListAsync();
+        }
+        public async Task<List<ProductOrders>> GetAllDeleveredOrderAsync()
+        {
+            return await _Context.ProductOrders
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.Order.isDelivered == true)
+            .ToListAsync();
+        }
+        public async Task<List<ProductOrders>> GetAllUnDeleveredOrderAsync()
+        {
+            return await _Context.ProductOrders
+            .Include(x => x.Product)
+            .Include(x => x.Order.Address)
+            .Include(x => x.Order)
+            .ThenInclude(x => x.Customer)
+            .ThenInclude(c => c.User)
+            .Where(x => x.Order.isDelivered == false)
+            .ToListAsync();
         }
     } 
 }

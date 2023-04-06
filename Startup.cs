@@ -94,9 +94,16 @@ namespace Project
             services.AddScoped<ILikeRepository,LikeRepository>();
             services.AddScoped<ILikeService,LikeService>();
 
+            services.AddScoped<IAddressRepository,AddressRepository>();
+            services.AddScoped<IAddressService,AddressService>();
+
             services.AddScoped<IverificationCodeRepository,VarificationCodeRepository>();
 
             services.AddScoped<IProductionRawMaterialRepository,ProductionRawMaterialRepository>();
+            services.AddScoped<IProductionRawMaterialService,ProductionRawMaterialService>();
+
+            services.AddScoped<ICategoryService,CategoryService>();
+            services.AddScoped<ICategoryRepository,CategoryRepository>();
 
             services.AddScoped<IMailServices,MailService>();
 

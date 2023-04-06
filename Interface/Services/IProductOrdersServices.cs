@@ -5,6 +5,5 @@ namespace Dansnom.Interface.Services
 {
     public interface IProductOrdersServices
     {
-        Task<ProductsOrdersResponseModel> Orders();
     }
 }

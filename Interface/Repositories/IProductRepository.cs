@@ -10,6 +10,8 @@ namespace Dansnom.Interface.Repositories
         Task<List<Product>> GetAllProductsAsync();
         Task<IEnumerable<Product>> GetAllUnavailableProductAsync();
         Task<List<Production>> GetProductsReadyForDelivery();
+        Task<List<Product>> GetProductsByCategoryIdAsync(int id);
+        Task<Product> GetProductAsync(int id);
     }
     
 }

@@ -19,45 +19,42 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.Sales
             .Include(c => c.Order)
-            .Include(x => x.Product)
             .Include(c => c.Order.Customer)
             .Where(c => c.Order.CustomerId == id)
             .ToListAsync();
         }
-        public async Task<List<Sales>> GetSalesByCustomerIdAndDateAsync(int id,DateTime dateOrded)
-        {
-            return await _Context.Sales
-            .Include(c => c.Order)
-            .Include(x => x.Product)
-            .Where(c => c.Order.CustomerId == id && c.Order.CreatedOn == dateOrded)
-            .ToListAsync();
-        }
-        public async Task<List<Sales>> GetSalesForTheMonthAsync(int id,int month,int year)
-        {
-            return await _Context.Sales
-            .Include(x => x.Product)
-            .Include(x => x.Order)
-            .ThenInclude(x => x.Customer)
-            .ThenInclude(x => x.User)
-            .Where(c => c.ProductId == id && c.CreatedOn.Month == month && c.CreatedOn.Year == year)
-            .ToListAsync();
+    //     public async Task<List<Sales>> GetSalesByCustomerIdAndDateAsync(int id,DateTime dateOrded)
+    //     {
+    //         return await _Context.Sales
+    //         .Include(c => c.Order)
+    //         .Include(x => x.Product)
+    //         .Where(c => c.Order.CustomerId == id && c.Order.CreatedOn == dateOrded)
+    //         .ToListAsync();
+    //     }
+    //     public async Task<List<Sales>> GetSalesForTheMonthAsync(int id,int month,int year)
+    //     {
+    //         return await _Context.Sales
+    //         .Include(x => x.Order)
+    //         .ThenInclude(x => x.Customer)
+    //         .ThenInclude(x => x.User)
+    //         .Where(c => c.ProductId == id && c.CreatedOn.Month == month && c.CreatedOn.Year == year)
+    //         .ToListAsync();
             
-        }
+    //     }
         
-       public async Task<List<Sales>> GetSalesForTheYearAsync(int id,int year)
-        {
-             return await _Context.Sales
-            .Include(x => x.Order.Address)
-            .Include(x => x.Order)
-            .ThenInclude(x => x.Customer)
-            .ThenInclude(x => x.User)
-            .Where(c => c.ProductId == id && c.CreatedOn.Year == year)
-            .ToListAsync();
-        }
+    //    public async Task<List<Sales>> GetSalesForTheYearAsync(int id,int year)
+    //     {
+    //          return await _Context.Sales
+    //         .Include(x => x.Order.Address)
+    //         .Include(x => x.Order)
+    //         .ThenInclude(x => x.Customer)
+    //         .ThenInclude(x => x.User)
+    //         .Where(c => c.ProductId == id && c.CreatedOn.Year == year)
+    //         .ToListAsync();
+    //     }
        public async Task<List<Sales>> GetAllSales()
         {
              return await _Context.Sales
-            .Include(x => x.Product)
             .Include(x => x.Order)
             .ThenInclude(x => x.Customer)
             .ToListAsync();
@@ -65,7 +62,6 @@ namespace Dansnom.Implementations.Repositories
        public async Task<List<Sales>> GetThisYearSales()
         {
              return await _Context.Sales
-            .Include(x => x.Product)
             .Include(x => x.Order)
             .ThenInclude(x => x.Customer)
             .Where(x => x.CreatedOn.Year == DateTime.Now.Year)
@@ -74,7 +70,6 @@ namespace Dansnom.Implementations.Repositories
        public async Task<List<Sales>> GetThisMonthSales()
         {
              return await _Context.Sales
-            .Include(x => x.Product)
             .Include(x => x.Order)
             .ThenInclude(x => x.Customer)
             .Where(x => x.CreatedOn.Year == DateTime.Now.Year && x.CreatedOn.Month == DateTime.Now.Month)

@@ -14,39 +14,24 @@ namespace Dansnom.Implementations.Repositories
         {
             _Context = context;
         }
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public async Task<List<Order>> GetAllDeleveredOrdersAsync()
         {
             return await _Context.Orders
-            .Include(x => x.Address)
-            .Include(x => x.Customer)
-            .Include(x => x.Customer.User)
-            .SingleOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
-        }
-        public async Task<List<Order>> GetAllOrderAsync()
-        {
-            return await _Context.Orders
-            .Include(x => x.Address)
-            .Include(x => x.Customer)
-            .Include(x => x.Customer.User)
-            .ToListAsync();
-        }
-        public async Task<List<Order>> GetAllDeleveredOrderAsync()
-        {
-            return await _Context.Orders
-            .Include(x => x.Address)
-            .Include(x => x.Customer)
-            .Include(x => x.Customer.User)
             .Where(x => x.isDelivered == true)
             .ToListAsync();
         }
-        public async Task<List<Order>> GetAllUnDeleveredOrderAsync()
+        public async Task<List<Order>> GetAllUnDeleveredOrdersAsync()
         {
             return await _Context.Orders
-            .Include(x => x.Address)
-            .Include(x => x.Customer)
-            .Include(x => x.Customer.User)
             .Where(x => x.isDelivered == false)
             .ToListAsync();
+        }
+        public async Task<List<Order>> GetOrderByCustomerId(int id)
+        {
+            return await _Context.Orders
+            .Include(x => x.Customer)
+            .Include(x => x.Address)
+            .Where(x => x.CustomerId == id).ToListAsync();
         }
     } 
 }

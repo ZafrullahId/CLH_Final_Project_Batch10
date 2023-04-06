@@ -33,5 +33,16 @@ namespace Dansnom.Implementations.Repositories
             .Include(c => c.Product)
             .Where(x => x.QuantityRemaining != 0.0m && x.Product.IsDeleted == false).ToListAsync();
          }
+         public async Task<List<Product>> GetProductsByCategoryIdAsync(int id)
+         {
+            return await _Context.Products
+            .Where(x => x.CategoryId == id && x.IsDeleted == false).ToListAsync();
+         }
+         public async Task<Product> GetProductAsync(int id)
+         {
+            return await _Context.Products
+            .Include(x => x.Category)
+            .Where(x => x.Id == id).SingleOrDefaultAsync();
+         }
     } 
 }

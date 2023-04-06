@@ -47,7 +47,7 @@ namespace Dansnom.Implementations.Services
                 return new BaseResponse
                 {
                     Message = "Successfuly liked",
-                    Success = false
+                    Success = true
                 };
             }
             var result = await UpdateLikeAsync(model.ReviewId, model.UserId);

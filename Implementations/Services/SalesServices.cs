@@ -20,7 +20,8 @@ namespace Dansnom.Implementations.Services
         private readonly IProductOrdersRepository _productOrdersRepository;
         private readonly IRawMaterialRepository _ramMaterialRepository;
         private readonly IProductionRepository _productionRepository;
-        public SalesServices(ISalesRepository salesRepository, ICustomerRepository customerRepository, IProductRepository productRepository, IWalletServices walletServices, IProductOrdersRepository productOrdersRepository, IRawMaterialRepository expensesRepository, IProductionRepository productionRepository)
+        private readonly IOrderRepository _orderRepository;
+        public SalesServices(ISalesRepository salesRepository, ICustomerRepository customerRepository, IProductRepository productRepository, IWalletServices walletServices, IProductOrdersRepository productOrdersRepository, IRawMaterialRepository expensesRepository, IProductionRepository productionRepository, IOrderRepository orderRepository)
         {
             _salesRepository = salesRepository;
             _customerRepository = customerRepository;
@@ -29,11 +30,12 @@ namespace Dansnom.Implementations.Services
             _productOrdersRepository = productOrdersRepository;
             _ramMaterialRepository = expensesRepository;
             _productionRepository = productionRepository;
+            _orderRepository = orderRepository;
         }
         public async Task<BaseResponse> CreateSales(int id)
         {
-            var productOrders = await _productOrdersRepository.GetOrderById(id);
-            if (productOrders == null)
+            var order = await _productOrdersRepository.GetOrdersByIdAsync(id);
+            if (order == null)
             {
                 return new BaseResponse
                 {
@@ -41,15 +43,19 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-
+            decimal totalAmount = 0;
+            foreach (var item in order)
+            {
+                totalAmount += item.Product.Price * item.QuantityBought;
+            }
             var sales = new Sales
             {
-                OrderId = productOrders.OrderId,
-                ProductId = productOrders.ProductId,
-                AmountPaid = productOrders.Order.QuantityBought * productOrders.Product.Price
+                OrderId = order[0].Order.Id,
+                // ProductId = productOrders.ProductId,
+                AmountPaid = totalAmount
             };
             var sale = await _salesRepository.CreateAsync(sales);
-            var wallet = await _walletServices.FundWallet(productOrders.Order.QuantityBought * productOrders.Product.Price);
+            var wallet = await _walletServices.FundWallet(totalAmount);
 
             return new BaseResponse
             {
@@ -78,30 +84,59 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
+            List<ProductOrdersDto> productOrdersDtos = new List<ProductOrdersDto>();
+            foreach (var item in sales)
+            {
+                var order = await _productOrdersRepository.GetOrdersByIdAsync(item.OrderId);
+                var productOrder = new ProductOrdersDto
+                {
+                    CustomerDto = new CustomerDto
+                    {
+                        FullName = order[0].Order.Customer.FullName,
+                        Username = order[0].Order.Customer.User.Username,
+                        PhoneNumber = order[0].Order.Customer.PhoneNumber,
+                        Email = order[0].Order.Customer.User.Email,
+                        ImageUrl = order[0].Order.Customer.User.ProfileImage
+                    },
+                    AddressDto = new AddressDto
+                    {
+                        AddressId = order[0].Order.Address.Id,
+                        State = order[0].Order.Address.State,
+                        City = order[0].Order.Address.City,
+                        Street = order[0].Order.Address.Street,
+                        PostalCode = order[0].Order.Address.PostalCode,
+                        AdditionalDetails = order[0].Order.Address.AdditionalDetails
+                    },
+                    OrderDtos = order.Select(x => new OrderDto
+                    {
+                        ProductDto = new ProductDto
+                        {
+                            Name = x.Product.Name,
+                            Price = x.Product.Price,
+                            ImageUrl = x.Product.ImageUrl,
+                            isAvailable = x.Product.isAvailable,
+                            Description = x.Product.Description
+                        },
+                        QuantityBought = x.QuantityBought,
+                        OrderedDate = x.Order.CreatedOn.ToLongDateString(),
+                        DeleveredDate = x.Order.LastModifiedOn.ToLongDateString()
+
+                    }).ToList(),
+                    isDelivered = order[0].Order.isDelivered
+                };
+                productOrdersDtos.Add(productOrder);
+            }
             return new SalesResponseModel
             {
                 Message = "Sales found successfully",
                 Success = true,
-                Data = sales.Select(x => new SalesDto
+                Data = productOrdersDtos.Select(x => new SalesDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
-                    OrderedDate = x.Order.CreatedOn.ToLongDateString(),
-                    DeliveredDate = x.CreatedOn.ToLongDateString(),
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Product.Id,
-                        Name = x.Product.Name,
-                        Price = x.Product.Price,
-                        ImageUrl = x.Product.ImageUrl,
-                        isAvailable = x.Product.isAvailable,
-                    },
-                    CustomerDto = new CustomerDto
-                    {
-                        FullName = x.Order.Customer.FullName,
-                        PhoneNumber = x.Order.Customer.PhoneNumber,
-                    }
-
+                    OrderDtos = x.OrderDtos,
+                    AmountPaid = x.OrderDtos.Sum(x => (x.ProductDto.Price * x.QuantityBought)),
+                    // OrderedDate = x.OrderDtos
+                    CustomerDto = x.CustomerDto,
+                    AddressId = x.AddressDto.AddressId
                 }).ToList()
             };
         }
@@ -117,30 +152,57 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
+            List<ProductOrdersDto> productOrdersDtos = new List<ProductOrdersDto>();
+            foreach (var sale in sales)
+            {
+                var order = await _productOrdersRepository.GetOrdersByIdAsync(sale.OrderId);
+                var productOrder = new ProductOrdersDto
+                {
+                    CustomerDto = new CustomerDto
+                    {
+                        FullName = order[0].Order.Customer.FullName,
+                        Username = order[0].Order.Customer.User.Username,
+                        PhoneNumber = order[0].Order.Customer.PhoneNumber,
+                        Email = order[0].Order.Customer.User.Email
+                    },
+                    AddressDto = new AddressDto
+                    {
+                        AddressId = order[0].Order.Address.Id,
+                        State = order[0].Order.Address.State,
+                        City = order[0].Order.Address.City,
+                        Street = order[0].Order.Address.Street,
+                        PostalCode = order[0].Order.Address.PostalCode,
+                        AdditionalDetails = order[0].Order.Address.AdditionalDetails
+                    },
+                    OrderDtos = order.Select(x => new OrderDto
+                    {
+                        ProductDto = new ProductDto
+                        {
+                            Name = x.Product.Name,
+                            Price = x.Product.Price,
+                            ImageUrl = x.Product.ImageUrl,
+                            isAvailable = x.Product.isAvailable,
+                            Description = x.Product.Description
+                        },
+                        QuantityBought = x.QuantityBought,
+                        OrderedDate = x.Order.CreatedOn.ToLongDateString(),
+                        DeleveredDate = x.Order.LastModifiedOn.ToLongDateString(),
+
+                    }).ToList(),
+                    isDelivered = order[0].Order.isDelivered
+                };
+                productOrdersDtos.Add(productOrder);
+            }
             return new SalesResponseModel
             {
                 Message = "Sales found successfully",
                 Success = true,
-                Data = sales.Select(x => new SalesDto
+                Data = productOrdersDtos.Select(x => new SalesDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
-                    OrderedDate = x.Order.CreatedOn.ToLongDateString(),
-                    DeliveredDate = x.CreatedOn.ToLongDateString(),
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Product.Id,
-                        Name = x.Product.Name,
-                        Price = x.Product.Price,
-                        ImageUrl = x.Product.ImageUrl,
-                        isAvailable = x.Product.isAvailable,
-                    },
-                    CustomerDto = new CustomerDto
-                    {
-                        FullName = x.Order.Customer.FullName,
-                        PhoneNumber = x.Order.Customer.PhoneNumber,
-                    }
-
+                    OrderDtos = x.OrderDtos,
+                    AmountPaid = x.OrderDtos.Sum(x => (x.ProductDto.Price * x.QuantityBought)),
+                    CustomerDto = x.CustomerDto,
+                    AddressId = x.AddressDto.AddressId
                 }).ToList()
             };
         }
@@ -156,30 +218,59 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
+            List<ProductOrdersDto> productOrdersDtos = new List<ProductOrdersDto>();
+            foreach (var sale in sales)
+            {
+                var order = await _productOrdersRepository.GetOrdersByIdAsync(sale.OrderId);
+                var productOrder = new ProductOrdersDto
+                {
+                    CustomerDto = new CustomerDto
+                    {
+                        FullName = order[0].Order.Customer.FullName,
+                        Username = order[0].Order.Customer.User.Username,
+                        PhoneNumber = order[0].Order.Customer.PhoneNumber,
+                        Email = order[0].Order.Customer.User.Email
+                    },
+                    AddressDto = new AddressDto
+                    {
+                        AddressId = order[0].Order.Address.Id,
+                        State = order[0].Order.Address.State,
+                        City = order[0].Order.Address.City,
+                        Street = order[0].Order.Address.Street,
+                        PostalCode = order[0].Order.Address.PostalCode,
+                        AdditionalDetails = order[0].Order.Address.AdditionalDetails
+                    },
+                    OrderDtos = order.Select(x => new OrderDto
+                    {
+                        ProductDto = new ProductDto
+                        {
+                            Name = x.Product.Name,
+                            Price = x.Product.Price,
+                            ImageUrl = x.Product.ImageUrl,
+                            isAvailable = x.Product.isAvailable,
+                            Description = x.Product.Description
+                        },
+                        QuantityBought = x.QuantityBought,
+                        OrderedDate = x.Order.CreatedOn.ToLongDateString(),
+                        DeleveredDate = x.Order.LastModifiedOn.ToLongDateString()
+
+                    }).ToList(),
+                    isDelivered = order[0].Order.isDelivered
+                };
+                productOrdersDtos.Add(productOrder);
+            }
             return new SalesResponseModel
             {
                 Message = "Sales found successfully",
                 Success = true,
-                Data = sales.Select(x => new SalesDto
+                Data = productOrdersDtos.Select(x => new SalesDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
-                    OrderedDate = x.Order.CreatedOn.ToLongDateString(),
-                    DeliveredDate = x.CreatedOn.ToLongDateString(),
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Product.Id,
-                        Name = x.Product.Name,
-                        Price = x.Product.Price,
-                        ImageUrl = x.Product.ImageUrl,
-                        isAvailable = x.Product.isAvailable,
-                    },
-                    CustomerDto = new CustomerDto
-                    {
-                        FullName = x.Order.Customer.FullName,
-                        PhoneNumber = x.Order.Customer.PhoneNumber,
-                    }
-
+                    OrderDtos = x.OrderDtos,
+                    AmountPaid = x.OrderDtos.Sum(x => (x.ProductDto.Price * x.QuantityBought)),
+                    // OrderedDate = x.OrderDtos
+                    // DeliveredDate = sales.Select(x => x.CreatedOn.ToLongDateString()).SingleOrDefault(),
+                    CustomerDto = x.CustomerDto,
+                    AddressId = x.AddressDto.AddressId
                 }).ToList()
             };
         }
@@ -195,95 +286,126 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            return new SalesResponseModel
+            List<ProductOrdersDto> productOrdersDtos = new List<ProductOrdersDto>();
+            foreach (var sale in sales)
             {
-                Message = "Sales found successfully",
-                Success = true,
-                Data = sales.Select(x => new SalesDto
+                var order = await _productOrdersRepository.GetOrdersByIdAsync(sale.OrderId);
+                var productOrder = new ProductOrdersDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
-                    OrderedDate = x.Order.CreatedOn.ToLongDateString(),
-                    DeliveredDate = x.CreatedOn.ToLongDateString(),
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Product.Id,
-                        Name = x.Product.Name,
-                        Price = x.Product.Price,
-                        ImageUrl = x.Product.ImageUrl,
-                        isAvailable = x.Product.isAvailable,
-                    },
                     CustomerDto = new CustomerDto
                     {
-                        FullName = x.Order.Customer.FullName,
-                        PhoneNumber = x.Order.Customer.PhoneNumber,
-                    }
+                        FullName = order[0].Order.Customer.FullName,
+                        Username = order[0].Order.Customer.User.Username,
+                        PhoneNumber = order[0].Order.Customer.PhoneNumber,
+                        Email = order[0].Order.Customer.User.Email
+                    },
+                    AddressDto = new AddressDto
+                    {
+                        AddressId = order[0].Order.Address.Id,
+                        State = order[0].Order.Address.State,
+                        City = order[0].Order.Address.City,
+                        Street = order[0].Order.Address.Street,
+                        PostalCode = order[0].Order.Address.PostalCode,
+                        AdditionalDetails = order[0].Order.Address.AdditionalDetails
+                    },
+                    OrderDtos = order.Select(x => new OrderDto
+                    {
+                        ProductDto = new ProductDto
+                        {
+                            Name = x.Product.Name,
+                            Price = x.Product.Price,
+                            ImageUrl = x.Product.ImageUrl,
+                            isAvailable = x.Product.isAvailable,
+                            Description = x.Product.Description
+                        },
+                        QuantityBought = x.QuantityBought,
+                        OrderedDate = x.Order.CreatedOn.ToLongDateString(),
+                        DeleveredDate = x.Order.LastModifiedOn.ToLongDateString()
 
-                }).ToList()
-            };
-        }
-        public async Task<SalesResponseModel> GetSalesByCustomerNameAndDateAsync(string name, DateTime dateOrded)
-        {
-            var customer = await _customerRepository.GetAsync(x => x.User.Username == name);
-            if (customer == null)
-            {
-                return new SalesResponseModel
-                {
-                    Message = $"Customer with {name} is not registered on this app",
-                    Success = false
+                    }).ToList(),
+                    isDelivered = order[0].Order.isDelivered
                 };
-            }
-            var sales = await _salesRepository.GetSalesByCustomerIdAndDateAsync(customer.Id, dateOrded);
-            if (sales == null)
-            {
-                return new SalesResponseModel
-                {
-                    Message = "no sales found for this customer",
-                    Success = false
-                };
+                productOrdersDtos.Add(productOrder);
             }
             return new SalesResponseModel
             {
                 Message = "Sales found successfully",
                 Success = true,
-                Data = sales.Select(x => new SalesDto
+                Data = productOrdersDtos.Select(x => new SalesDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
-                    ProductDto = new ProductDto
-                    {
-                        Name = x.Product.Name,
-                        Price = x.Product.Price,
-                        ImageUrl = x.Product.ImageUrl,
-                        isAvailable = x.Product.isAvailable
-                    },
-
+                    OrderDtos = x.OrderDtos,
+                    AmountPaid = x.OrderDtos.Sum(x => (x.ProductDto.Price * x.QuantityBought)),
+                    // OrderedDate = x.OrderDtos
+                    // DeliveredDate = sales.Select(x => x.CreatedOn.ToLongDateString()).SingleOrDefault(),
+                    CustomerDto = x.CustomerDto,
+                    AddressId = x.AddressDto.AddressId
                 }).ToList()
             };
         }
-        public async Task<SalesResponseModel> GetSalesForTheMonthOnEachProduct(int month, int year)
+        // public async Task<SalesResponseModel> GetSalesByCustomerNameAndDateAsync(string name, DateTime dateOrded)
+        // {
+        //     var customer = await _customerRepository.GetAsync(x => x.User.Username == name);
+        //     if (customer == null)
+        //     {
+        //         return new SalesResponseModel
+        //         {
+        //             Message = $"Customer with {name} is not registered on this app",
+        //             Success = false
+        //         };
+        //     }
+        //     var sales = await _salesRepository.GetSalesByCustomerIdAndDateAsync(customer.Id, dateOrded);
+        //     if (sales == null)
+        //     {
+        //         return new SalesResponseModel
+        //         {
+        //             Message = "no sales found for this customer",
+        //             Success = false
+        //         };
+        //     }
+        //     return new SalesResponseModel
+        //     {
+        //         Message = "Sales found successfully",
+        //         Success = true,
+        //         Data = sales.Select(x => new SalesDto
+        //         {
+        //             QuantityBought = x.Order.QuantityBought,
+        //             AmountPaid = x.AmountPaid,
+        //             ProductDto = new ProductDto
+        //             {
+        //                 Name = x.Product.Name,
+        //                 Price = x.Product.Price,
+        //                 ImageUrl = x.Product.ImageUrl,
+        //                 isAvailable = x.Product.isAvailable
+        //             },
+
+        //         }).ToList()
+        //     };
+        // }
+        public async Task<OrdersResponseModel> GetSalesForTheMonthOnEachProduct(int month, int year)
         {
             var prod = await _productRepository.GetAllProductsAsync();
             if (prod.Count == 0)
             {
-                return new SalesResponseModel
+                return new OrdersResponseModel
                 {
                     Message = "No Products found",
                     Success = true
                 };
             }
-            List<Sales> monthlySales = new List<Sales>();
-
+            List<ProductOrders> monthlySales = new List<ProductOrders>();
             foreach (var item in prod)
             {
-                var salesPerProduct = await _salesRepository.GetSalesForTheMonthAsync(item.Id, month, year);
-
-                var sale = new Sales
+                var salesPerProduct = await _productOrdersRepository.GetAllDeleveredOrderByProductIdForTheMonthAsync(item.Id, month, year);
+                decimal quantity = 0;
+                foreach (var sal in salesPerProduct)
                 {
-                    AmountPaid = salesPerProduct.Sum(x => x.AmountPaid),
+                    quantity += sal.QuantityBought;
+                }
+                var productOders = new ProductOrders
+                {
+                    QuantityBought = salesPerProduct.Sum(x => x.QuantityBought),
                     Order = new Order
                     {
-                        QuantityBought = salesPerProduct.Sum(x => x.Order.QuantityBought)
                     },
                     Product = new Product
                     {
@@ -294,16 +416,16 @@ namespace Dansnom.Implementations.Services
                         Price = item.Price
                     }
                 };
-                monthlySales.Add(sale);
+                monthlySales.Add(productOders);
             }
-            return new SalesResponseModel
+            return new OrdersResponseModel
             {
                 Message = "Sales found Successfully",
                 Success = true,
-                Data = monthlySales.Select(x => new SalesDto
+                Data = monthlySales.Select(x => new OrderDto
                 {
-                    AmountPaid = x.AmountPaid,
-                    QuantityBought = x.Order.QuantityBought,
+                    AmountPaid = x.QuantityBought * x.Product.Price,
+                    QuantityBought = x.QuantityBought,
                     ProductDto = new ProductDto
                     {
                         ProductId = x.Product.Id,
@@ -315,52 +437,58 @@ namespace Dansnom.Implementations.Services
                 }).ToList()
             };
         }
-        public async Task<SalesResponseModel> GetSalesForTheYearOnEachProduct(int year)
+        public async Task<OrdersResponseModel> GetSalesForTheYearOnEachProduct(int year)
         {
             var prod = await _productRepository.GetAllProductsAsync();
-            if (prod == null)
+            if (prod.Count == 0)
             {
-                return new SalesResponseModel
+                return new OrdersResponseModel
                 {
                     Message = "No Products found",
                     Success = true
                 };
             }
-            List<Sales> yearlySales = new List<Sales>();
-
+            List<ProductOrders> monthlySales = new List<ProductOrders>();
             foreach (var item in prod)
             {
-                var salesPerProduct = await _salesRepository.GetSalesForTheYearAsync(item.Id, year);
-
-                var sale = new Sales
+                var salesPerProduct = await _productOrdersRepository.GetAllDeleveredOrderByProductIdForTheYearAsync(item.Id, year);
+                decimal quantity = 0;
+                foreach (var sal in salesPerProduct)
                 {
-                    AmountPaid = salesPerProduct.Sum(x => x.AmountPaid),
+                    quantity += sal.QuantityBought;
+                }
+                var productOders = new ProductOrders
+                {
+                    QuantityBought = quantity,
                     Order = new Order
                     {
-                        QuantityBought = salesPerProduct.Sum(x => x.Order.QuantityBought)
                     },
                     Product = new Product
                     {
                         Id = item.Id,
                         Name = item.Name,
-                        ImageUrl = item.ImageUrl
+                        ImageUrl = item.ImageUrl,
+                        isAvailable = item.isAvailable,
+                        Price = item.Price
                     }
                 };
-                yearlySales.Add(sale);
+                monthlySales.Add(productOders);
             }
-            return new SalesResponseModel
+            return new OrdersResponseModel
             {
                 Message = "Sales found Successfully",
                 Success = true,
-                Data = yearlySales.Select(x => new SalesDto
+                Data = monthlySales.Select(x => new OrderDto
                 {
-                    AmountPaid = x.AmountPaid,
-                    QuantityBought = x.Order.QuantityBought,
+                    AmountPaid = x.QuantityBought * x.Product.Price,
+                    QuantityBought = x.QuantityBought,
                     ProductDto = new ProductDto
                     {
                         ProductId = x.Product.Id,
                         Name = x.Product.Name,
-                        ImageUrl = x.Product.ImageUrl
+                        ImageUrl = x.Product.ImageUrl,
+                        isAvailable = x.Product.isAvailable,
+                        Price = x.Product.Price
                     }
                 }).ToList()
             };
@@ -548,7 +676,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            var sales = await _salesRepository.GetSalesForTheMonthAsync(prdct.Id, month, year);
+            var sales = await _productOrdersRepository.GetAllDeleveredOrderByProductIdForTheMonthAsync(productId, month, year);
             if (sales.Count == 0)
             {
                 return new SalesResponseModel
@@ -563,48 +691,49 @@ namespace Dansnom.Implementations.Services
                 Success = true,
                 Data = sales.Select(x => new SalesDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
+                    // QuantityBought = x.QuantityBought,
+                    AmountPaid = x.QuantityBought * x.Product.Price,
+                    AddressId = x.Order.AddressId,
                     CustomerDto = new CustomerDto
                     {
                         FullName = x.Order.Customer.FullName,
                         PhoneNumber = x.Order.Customer.PhoneNumber,
                         ImageUrl = x.Order.Customer.User.ProfileImage,
-                    }
+                    },
                 }).ToList()
             };
         }
-        public async Task<SalesResponseModel> GetSalesByProductNameForTheYear(int productId,int year)
+        public async Task<ProductsSaleResponseModel> GetSalesByProductNameForTheYear(int productId,int year)
         {
             var prdct = await _productRepository.GetAsync(productId);
             if (prdct == null)
             {
-                return new SalesResponseModel
+                return new ProductsSaleResponseModel
                 {
                     Message = "Product not found",
                     Success = false
                 };
             }
-            var sales = await _salesRepository.GetSalesForTheYearAsync(prdct.Id, year);
+            var sales = await _productOrdersRepository.GetAllDeleveredOrderByProductIdForTheYearAsync(productId, year);
             if (sales.Count == 0)
             {
-                return new SalesResponseModel
+                return new ProductsSaleResponseModel
                 {
                     Message = $"No sales found for {prdct.Name}",
                     Success = false
                 };
             }
-            return new SalesResponseModel
+            return new ProductsSaleResponseModel
             {
                 Message = "Sales found successfully",
                 Success = true,
-                Data = sales.Select(x => new SalesDto
+                Data = sales.Select(x => new ProductSaleDto
                 {
-                    QuantityBought = x.Order.QuantityBought,
-                    AmountPaid = x.AmountPaid,
+                    QuantityBought = x.QuantityBought,
+                    AmountPaid = x.QuantityBought * x.Product.Price,
                     AddressId = x.Order.AddressId,
                     OrderedDate = x.Order.CreatedOn.ToLongDateString(),
-                    DeliveredDate = x.CreatedOn.ToLongDateString(),
+                    DeleveredDate = x.Order.LastModifiedOn.ToLongDateString(),
                     CustomerDto = new CustomerDto
                     {
                         FullName = x.Order.Customer.FullName,
@@ -613,15 +742,19 @@ namespace Dansnom.Implementations.Services
                     },
                     ProductDto = new ProductDto
                     {
-                        ProductId = prdct.Id
+                        ProductId = x.Product.Id,
+                        Name = x.Product.Name,
+                        ImageUrl = x.Product.ImageUrl,
+                        isAvailable = x.Product.isAvailable,
+                        Price = x.Product.Price
                     }
                 }).ToList()
             };
         }
         public async Task<ProfitResponseModel> CalculateNetProfitAsync(int year, int month, decimal extraExpenses)
         {
-            var expense = await _ramMaterialRepository.GetSumOfAprovedRawMaterialForTheMonthAsync(month,year);
-            var sales = await _salesRepository.GetTotalMonthlySalesAsync(month,year);
+            var expense = await _ramMaterialRepository.GetSumOfAprovedRawMaterialForTheMonthAsync(month, year);
+            var sales = await _salesRepository.GetTotalMonthlySalesAsync(month, year);
             return new ProfitResponseModel
             {
                 Message = "Net profit calculated successfully",

@@ -22,10 +22,11 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.SenderId == senderId && x.ReceiverId == recieverId || x.SenderId == recieverId && x.ReceiverId == senderId).OrderBy(x => x.CreatedOn)
             .ToListAsync();
         }
-        public int GetAllUnSeenChatAsync(int recieverId)
+        public async Task<List<Chat>> GetAllUnSeenChatAsync(int recieverId)
         {
-            return _Context.Chats
-            .Where(x => x.ReceiverId == recieverId && x.Seen == false).Count();
+            return await _Context.Chats
+            .Include(x => x.Sender)
+            .Where(x => x.ReceiverId == recieverId && x.Seen == false).ToListAsync();
         }
         public async Task<List<Chat>> GetAllUnSeenChatAsync(int senderId,int recieverId)
         {

@@ -11,7 +11,8 @@ namespace Dansnom.Interface.Services
         Task<ProductsResponseModel> GetAllProducts();
         Task<ProductResponseModel> GetProductById(int id);
         Task<BaseResponse> UpdateProduct(UpdateProductRequestModel model,int id);
-        Task<ProductsResponseModel> GetProductsReadyForDelivery();
+        Task<ProductsResponseModel> GetAvailableProductsAsync();
         Task<BaseResponse> UpdateProductsAvailability();
+        Task<ProductsResponseModel> GetProductsByCategoryId(int id);
     }
 }

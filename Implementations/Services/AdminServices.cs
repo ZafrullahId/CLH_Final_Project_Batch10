@@ -34,12 +34,12 @@ namespace Dansnom.Implementations.Services
 
         public async Task<BaseResponse> AddAdmin(CreateAdminRequestModel model)
         {
-            var admin = await _adminRepository.GetAsync(a => a.User.Email == model.Email);
+            var admin = await _userRepository.GetAsync(a => a.Email == model.Email);
             if (admin != null)
             {
                 return new BaseResponse()
                 {
-                    Message = "Admin Already Exist",
+                    Message = "User Already Exist",
                     Success = false,
                 };
             }
@@ -89,7 +89,7 @@ namespace Dansnom.Implementations.Services
                 Subject = "Complete Your Registration",
                 ToEmail = user.Email,
                 ToName = model.FullName,
-                HtmlContent = $"<html><body><h1>Hello {model.FullName}, Welcome to Dansnom Farm Limited.</h1><h4>Your email has been registered with Dansnom but your registration is not yet complete.</h4><h5>To complete your registration click <a href=\"http://127.0.0.1:5500/AdminFrontEnd/completeRegistration.html?email={model.Email}\">here</a></h5></body></html>",
+                HtmlContent = $"<div style=\"display: flex;justify-content: center;\"><img src=\"https://media.licdn.com/dms/image/C510BAQHtR8AdDc-aJg/company-logo_200_200/0/1519909536138?e=2147483647&v=beta&t=n-uF8UVHI5jdSuAZ61e6OVnV1n8PWocgp3lZ0igTpyg\" alt=\"logo\" width=\"100px\" height=\"100px\"></div><h2>Hello {model.FullName}, Welcome to Dansnom Farm Limited.</h2><h4>Your email has been registered with Dansnom Farm and you've been selected for the role as a {model.Role} but your registration is not yet complete.</h4><h5>To complete your registration click <a href=\"http://127.0.0.1:5500/FrontEnd/AdminFrontEnd/completeRegistration.html?email={model.Email}\">here</a></h5>",
             };
             _mailService.SendEMailAsync(mailRequest);
             return new BaseResponse
@@ -125,8 +125,7 @@ namespace Dansnom.Implementations.Services
                     model.ProfileImage.CopyTo(fileStream);
                 }
             }
-
-            admin.User.Username = model.Username ?? admin.User.Username;
+            admin.User.Username ??= model.Username;
             admin.FullName = model.FullName ?? admin.FullName;
             admin.User.Email = model.Email ?? admin.User.Email;
             admin.PhoneNumber = model.PhoneNumber ?? admin.PhoneNumber;

@@ -68,10 +68,20 @@ namespace Project.Controllers
             }
             return Ok(product);
         }
-        [HttpGet("GetProductsReadyForDelivery")]
-        public async Task<IActionResult> GetProductsReadyForDelivery()
+        [HttpGet("GetAvailableProducts")]
+        public async Task<IActionResult> GetAvailableProductsAsync()
         {
-            var products = await _productServices.GetProductsReadyForDelivery();
+            var products = await _productServices.GetAvailableProductsAsync();
+            if (products.Success == false)
+            {
+                return BadRequest(products);
+            }
+            return Ok(products);
+        }
+        [HttpGet("GetProductByCategoryId/{id}")]
+        public async Task<IActionResult> GetByCategoryId(int id)
+        {
+            var products = await _productServices.GetProductsByCategoryId(id);
             if (products.Success == false)
             {
                 return BadRequest(products);

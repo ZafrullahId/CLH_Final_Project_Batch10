@@ -9,6 +9,6 @@ namespace Dansnom.Interface.Services
         Task<BaseResponse> CreateChat(CreateChatRequestModel model, int id, int recieverId);
         Task<ChatsResponseModel> GetChatFromASenderAsync(int senderId, int recieverId);
         Task<BaseResponse> MarkAllChatsAsReadAsync(int senderId, int recieverId);
-        Task<BaseResponse> GetAllUnSeenChatAsync(int recieverId);
+        Task<ChatsResponseModel> GetAllUnSeenChatAsync(int recieverId);
     }
 }

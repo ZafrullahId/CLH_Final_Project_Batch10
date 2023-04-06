@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Dansnom.Enums;
 
 namespace Dansnom.Dtos
@@ -6,7 +7,7 @@ namespace Dansnom.Dtos
     public class ProductionDto
     {
         public ProductDto ProductDto { get; set; }
-        public RawMaterialDto RawMaterialDto { get; set; }
+        public List<RawMaterialDto> RawMaterialDto { get; set; }
         public string ProductionDate { get; set; }
         public decimal QuantityProduced { get; set; }
         public decimal QuantityRemaining { get; set; }

@@ -15,9 +15,9 @@ namespace Dansnom.Interface.Repositories
         Task<List<ProductionRawMaterial>> GetAllRejectedProductionsByMonthAsync(int month);
         Task<List<ProductionRawMaterial>> GetAllRejectedProductionsByYearAsync(int year);
         Task<List<ProductionRawMaterial>> GetAllApprovedYearlyProduction(int year,int id);
-        Task<List<ProductionRawMaterial>> GetProductionsByDate(string date);
         Task<List<ProductionRawMaterial>> GetProductionsByProductId(int id);
         Task<ProductionRawMaterial> Create(ProductionRawMaterial entity);
         Task<List<ProductionRawMaterial>> GetProductionsById(int id);
+        Task<List<ProductionRawMaterial>> GetProductionsByRawMaterialIdAsync(int id);
     }
 }

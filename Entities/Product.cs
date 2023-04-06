@@ -11,8 +11,9 @@ namespace Dansnom.Entities
         public string ImageUrl { get; set; }
         public string Description { get; set; }
         public bool isAvailable { get; set; }
+        public Category Category { get; set; }
+        public int CategoryId { get; set; }
         public List<ProductOrders> ProductOrders { get; set; } = new List<ProductOrders>();
         public List<Production> Production { get; set; } = new List<Production>();
-        public List< Sales> Sales { get; set; } = new List<Sales>();
     }
 }

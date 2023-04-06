@@ -96,23 +96,28 @@ namespace Dansnom.Implementations.Services
                 }).ToList()
             };
         }
-        public async Task<BaseResponse> GetAllUnSeenChatAsync(int recieverId)
+        public async Task<ChatsResponseModel> GetAllUnSeenChatAsync(int recieverId)
         {
             var receiver = await _adminRepository.GetAdminByUserIdAsync(recieverId);
             if (receiver == null)
             {
-                return new BaseResponse
+                return new ChatsResponseModel
                 {
                     Message = "Opps Something Bad went wrong",
                     Success = false
                 };
             }
-            var unseen = _chatRepository.GetAllUnSeenChatAsync(receiver.Id);
+            var unseen = await _chatRepository.GetAllUnSeenChatAsync(receiver.Id);
            
-            return new BaseResponse
+            return new ChatsResponseModel
             {
-                Message = unseen.ToString(),
+                Message = "Successful",
                 Success = true,
+                Data = unseen.Select(x => new ChatDto
+                {
+                    SenderId = x.Sender.UserId,
+                    
+                }).ToList()
             };
         }
         public async Task<BaseResponse> MarkAllChatsAsReadAsync(int senderId, int recieverId)

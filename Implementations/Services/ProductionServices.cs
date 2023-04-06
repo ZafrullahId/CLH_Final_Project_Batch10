@@ -80,7 +80,7 @@ namespace Dansnom.Implementations.Services
                     {
                         return new BaseResponse
                         {
-                            Message = "Raw Material needs to be aproved",
+                            Message = $"{raw.Name} Raw Material needs to be aproved",
                             Success = false
                         };
                     }
@@ -130,91 +130,119 @@ namespace Dansnom.Implementations.Services
                 Success = true
             };
         }
-        public async Task<ProductionsResponseModel> GetAllAprovedProductionsByYearAsync(int year)
+        public async Task<ProductionsResponseModel> GetAllAprovedProductionsAsync()
         {
-            var productions = await _productionRawMaterialRepository.GetAllAprovedProductionsByYearAsync(year);
+            var productions = await _productionRepository.GetAllApprovedProduction();
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
                 {
-                    Message = $"no Aproved production found for {year}",
+                    Message = $"no Aproved production found for",
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
+                };
+                ProductionDto.Add(productionDto);
+            }
+            return new ProductionsResponseModel
+            {
+                Message = "Production retrieved successfully",
+                Success = true,
+                Data = ProductionDto.Select(x => new ProductionDto
+                {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
-        public async Task<ProductionsResponseModel> GetAllRejectedProductionsByYearAsync(int year)
+        public async Task<ProductionsResponseModel> GetAllRejectedProductionsAsync()
         {
-            var productions = await _productionRawMaterialRepository.GetAllRejectedProductionsByYearAsync(year);
+            var productions = await _productionRepository.GetAllRejectedProduction();
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
                 {
-                    Message = $"no Rejected production found for {year}",
+                    Message = $"no Rejected production",
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Rejected Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
+                };
+                ProductionDto.Add(productionDto);
+            }
+            return new ProductionsResponseModel
+            {
+                Message = "Production retrieved successfully",
+                Success = true,
+                Data = ProductionDto.Select(x => new ProductionDto
+                {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
-        public async Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int month)
+        public async Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int year, int month)
         {
-            var productions = await _productionRawMaterialRepository.GetAllAprovedProductionsByMonthAsync(month);
+            var productions = await _productionRepository.GetAllAprovedProductionsByMonthAsync(year, month);
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
@@ -223,80 +251,53 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Approved Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
-                }).ToList()
-            };
-        }
-        public async Task<ProductionsResponseModel> GetAllRejectedProductionsByMonthAsync(int month)
-        {
-            var productions = await _productionRawMaterialRepository.GetAllRejectedProductionsByMonthAsync(month);
-            if (productions.Count == 0)
-            {
-                return new ProductionsResponseModel
-                {
-                    Message = $"no Rejected production found for {month}",
-                    Success = false
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
                 };
+                ProductionDto.Add(productionDto);
             }
             return new ProductionsResponseModel
             {
-                Message = "Rejected Productins found",
+                Message = "Production retrieved successfully",
                 Success = true,
-                Data = productions.Select(x => new ProductionDto
+                Data = ProductionDto.Select(x => new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
-                    },
-                    RawMaterialDto = new RawMaterialDto
-                    {
-                        Cost = x.RawMaterial.Cost,
-                        QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
         public async Task<ProductionsResponseModel> GetAllPendingProductionsAsync()
         {
-            var productions = await _productionRawMaterialRepository.GetAllPendingProductionsAsync();
+            var productions = await _productionRepository.GetAllPendingProductionsAsync();
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
@@ -305,39 +306,53 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Pending Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
+                };
+                ProductionDto.Add(productionDto);
+            }
+            return new ProductionsResponseModel
+            {
+                Message = "Production retrieved successfully",
+                Success = true,
+                Data = ProductionDto.Select(x => new ProductionDto
+                {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
         public async Task<ProductionsResponseModel> GetProductionsByDateAsync(string date)
         {
-            var productions = await _productionRawMaterialRepository.GetProductionsByDate(date);
+            var productions = await _productionRepository.GetProductionsByDate(date);
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
@@ -346,40 +361,62 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
+                };
+                ProductionDto.Add(productionDto);
+            }
+            return new ProductionsResponseModel
+            {
+                Message = "Production for" + date + "retrieved successfully",
+                Success = true,
+                Data = ProductionDto.Select(x => new ProductionDto
+                {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
         public async Task<ProductionsResponseModel> GetProductionsByProductIdAsync(int id)
         {
-            var productions = await _productionRawMaterialRepository.GetProductionsByProductId(id);
             var prod = await _productRepository.GetAsync(id);
+            if (prod == null)
+            {
+                return new ProductionsResponseModel
+                {
+                    Message = "Product not found",
+                    Success = false
+                };
+            }
+            var productions = await _productionRepository.GetProductionsByProductId(prod.Id);
             if (productions.Count == 0)
             {
                 return new ProductionsResponseModel
@@ -388,37 +425,51 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            return new ProductionsResponseModel
+            var ProductionDto = new List<ProductionDto>();
+            foreach (var prodtion in productions)
             {
-                Message = "Productins found",
-                Success = true,
-                Data = productions.Select(x => new ProductionDto
+                var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                var productionDto = new ProductionDto
                 {
-                    ApprovalStatus = x.Production.ApprovalStatus,
-                    ProductionDate = x.Production.ProductionDate,
-                    QuantityRequest = x.Production.QuantityRequest,
-                    QuantityProduced = x.Production.QuantityProduced,
-                    QuantityRemaining = x.Production.QuantityRemaining,
-                    AdditionalMessage = x.Production.AdditionalMessage,
                     ProductDto = new ProductDto
                     {
-                        ProductId = x.Production.ProductId,
-                        Name = x.Production.Product.Name,
-                        Price = x.Production.Product.Price,
-                        ImageUrl = x.Production.Product.ImageUrl,
-                        isAvailable = x.Production.Product.isAvailable
+                        Name = prodtion.Product.Name,
+                        Price = prodtion.Product.Price,
+                        ImageUrl = prodtion.Product.ImageUrl,
+                        isAvailable = prodtion.Product.isAvailable,
                     },
-                    RawMaterialDto = new RawMaterialDto
+                    ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                    QuantityRemaining = prodtion.QuantityRemaining,
+                    QuantityProduced = prodtion.QuantityProduced,
+                    QuantityRequest = prodtion.QuantityRequest,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
+                        Id = x.RawMaterial.Id,
+                        Name = x.RawMaterial.Name,
                         Cost = x.RawMaterial.Cost,
                         QuantiityBought = x.RawMaterial.QuantiityBought,
-                        Name = x.RawMaterial.Name,
-                        AdditionalMessage = x.RawMaterial.AdditionalMessage,
-                    }
+                        QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                        StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                    }).ToList()
+                };
+                ProductionDto.Add(productionDto);
+            }
+            return new ProductionsResponseModel
+            {
+                Message = "Production for" + prod.Name + "retrieved successfully",
+                Success = true,
+                Data = ProductionDto.Select(x => new ProductionDto
+                {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
-        public async Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductByYearAsync(int year)
+        public async Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductAsync()
         {
 
             var product = await _productRepository.GetAllAsync();
@@ -430,39 +481,51 @@ namespace Dansnom.Implementations.Services
                     Success = true
                 };
             }
-            List<Production> productions = new List<Production>();
+            List<ProductionDto> productionDtos = new List<ProductionDto>();
             foreach (var item in product)
             {
-                var prodtion = await _productionRawMaterialRepository.GetAllApprovedYearlyProduction(year, item.Id);
-                var production = new Production
+                var productions = await _productionRepository.GetProductionsByProductId(item.Id);
+                foreach (var prodtion in productions)
                 {
-                    QuantityProduced = prodtion.Sum(x => x.Production.QuantityProduced),
-                    Product = new Product
+                    var production = await _productionRawMaterialRepository.GetProductionsById(prodtion.Id);
+                    var productionDto = new ProductionDto
                     {
-                        Id = item.Id,
-                        Name = item.Name,
-                        ImageUrl = item.ImageUrl,
-                        Price = item.Price,
-                        isAvailable = item.isAvailable
-                    },
-                };
-                productions.Add(production);
+                        ProductDto = new ProductDto
+                        {
+                            Name = prodtion.Product.Name,
+                            Price = prodtion.Product.Price,
+                            ImageUrl = prodtion.Product.ImageUrl,
+                            isAvailable = prodtion.Product.isAvailable,
+                        },
+                        ProductionDate = prodtion.LastModifiedOn.ToLongDateString(),
+                        QuantityRemaining = prodtion.QuantityRemaining,
+                        QuantityProduced = prodtion.QuantityProduced,
+                        QuantityRequest = prodtion.QuantityRequest,
+                        RawMaterialDto = production.Select(x => new RawMaterialDto
+                        {
+                            Id = x.RawMaterial.Id,
+                            Name = x.RawMaterial.Name,
+                            Cost = x.RawMaterial.Cost,
+                            QuantiityBought = x.RawMaterial.QuantiityBought,
+                            QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
+                            StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                        }).ToList()
+                    };
+                    productionDtos.Add(productionDto);
+                }
             }
             return new ProductionsResponseModel
             {
                 Message = "Production for each product successfully found",
                 Success = true,
-                Data = productions.Select(x => new ProductionDto
+                Data = productionDtos.Select(x => new ProductionDto
                 {
+                    ProductDto = x.ProductDto,
+                    RawMaterialDto = x.RawMaterialDto,
+                    ProductionDate = x.ProductionDate,
                     QuantityProduced = x.QuantityProduced,
-                    ProductDto = new ProductDto
-                    {
-                        ProductId = x.Product.Id,
-                        Name = x.Product.Name,
-                        ImageUrl = x.Product.ImageUrl,
-                        Price = x.Product.Price,
-                        isAvailable = x.Product.isAvailable
-                    }
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest
                 }).ToList()
             };
         }
@@ -572,6 +635,7 @@ namespace Dansnom.Implementations.Services
                 await _rawMaterialRepository.UpdateAsync(material);
             }
             production.ApprovalStatus = ApprovalStatus.Approved;
+            production.LastModifiedOn = DateTime.Now;
             await _productionRepository.UpdateAsync(production);
             await _productServices.UpdateProductsAvailability();
             return new BaseResponse

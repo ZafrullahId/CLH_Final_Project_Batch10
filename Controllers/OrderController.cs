@@ -14,16 +14,14 @@ namespace Project.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderServices _orderServices;
-        private readonly IProductOrdersServices _productOrdersServices;
         public OrderController(IOrderServices orderServices,IProductOrdersServices productOrdersServices)
         {   
             _orderServices = orderServices;
-            _productOrdersServices = productOrdersServices;
         }
-        [HttpPost("CreateOrder/{userId}/{productId}")]
-        public async Task<IActionResult> CreateAsync([FromForm]CreateOrderRequestModel model,[FromRoute]int userId,[FromRoute]int productId)
+        [HttpPost("CreateOrder/{userId}")]
+        public async Task<IActionResult> CreateAsync([FromBody]CreateOrderRequestModel model,[FromRoute]int userId)
         {
-            var order = await _orderServices.CreateOrderAsync(model,userId,productId);
+            var order = await _orderServices.CreateOrderAsync(model,userId);
             if (order.Success == false)
             {
                 return BadRequest(order);
@@ -33,7 +31,7 @@ namespace Project.Controllers
         [HttpGet("GetOrders")]
         public async Task<IActionResult> GetOrdersAsync()
         {
-            var orders = await _productOrdersServices.Orders();
+            var orders = await _orderServices.GetAllOrders();
             if (orders.Success == false)
             {
                 return BadRequest(orders);
@@ -50,6 +48,16 @@ namespace Project.Controllers
             }
             return Ok(order);
         }
+        [HttpGet("GetByCustomerId/{id}")]
+        public async Task<IActionResult> GetOrderByCustomerIdAsync([FromRoute]int id)
+        {
+            var order = await _orderServices.GetOrdersByCustomerIdAsync(id);
+            if (order.Success == false)
+            {
+                return BadRequest(order);
+            }
+            return Ok(order);
+        }
         [HttpPut("Update")]
         public async Task<IActionResult> UpdatedOrders(int id)
         {
@@ -60,10 +68,20 @@ namespace Project.Controllers
             }
             return Ok(order);
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GettAllAsync()
+        [HttpGet("GetAllDeleveredOrders")]
+        public async Task<IActionResult> GetAllDeleveredOrders()
         {
             var orders = await _orderServices.GetAllDeleveredOrders();
+            if(orders.Success == false)
+            {
+                return BadRequest(orders);
+            }
+            return Ok(orders);
+        }
+        [HttpGet("GetAllUnDeleveredOrders")]
+        public async Task<IActionResult> GetAllUnDeleveredOrders()
+        {
+            var orders = await _orderServices.GetAllUnDeleveredOrders();
             if(orders.Success == false)
             {
                 return BadRequest(orders);

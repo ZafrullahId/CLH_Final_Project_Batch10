@@ -13,5 +13,6 @@ namespace Dansnom.Entities
         public string City { get; set; }
         public string State { get; set; }
         public int? PostalCode { get; set; }
+        public string AdditionalDetails { get; set; }
     }
 }

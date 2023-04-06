@@ -18,12 +18,14 @@ namespace Dansnom.Implementations.Services
         private readonly IProductRepository _productRepository;
         private readonly IProductionRepository _productionRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public ProductServices(IProductRepository productRepository, IWebHostEnvironment webHostEnvironment, IProductionRepository productionRepository)
+        public ProductServices(IProductRepository productRepository, IWebHostEnvironment webHostEnvironment, IProductionRepository productionRepository,ICategoryRepository categoryRepository)
         {
             _productRepository = productRepository;
             _webHostEnvironment = webHostEnvironment;
             _productionRepository = productionRepository;
+            _categoryRepository = categoryRepository;
         }
         public async Task<BaseResponse> CreateProduct(CreateProductRequestModel model)
         {
@@ -33,6 +35,15 @@ namespace Dansnom.Implementations.Services
                 return new BaseResponse
                 {
                     Message = "Product Already Exist",
+                    Success = false
+                };
+            }
+            var category = await _categoryRepository.GetAsync(x => x.Name == model.CategoryName);
+            if (category == null)
+            {
+                return new BaseResponse
+                {
+                    Message = $"Category {model.CategoryName} not found",
                     Success = false
                 };
             }
@@ -56,6 +67,7 @@ namespace Dansnom.Implementations.Services
                 Price = model.Price,
                 ImageUrl = imageName,
                 isAvailable = false,
+                CategoryId = category.Id,
                 Description = model.Description
             };
             await _productRepository.CreateAsync(product);
@@ -76,10 +88,6 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            foreach (var prod in products)
-            {
-                var production = await _productionRepository.GetProductionsByProductId(prod.Id);
-            }
             return new ProductsResponseModel
             {
                 Message = "Products found",
@@ -98,7 +106,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<ProductResponseModel> GetProductById(int id)
         {
-            var prod = await _productRepository.GetAsync(id);
+            var prod = await _productRepository.GetProductAsync(id);
             if (prod == null)
             {
                 return new ProductResponseModel
@@ -117,13 +125,16 @@ namespace Dansnom.Implementations.Services
                     Name = prod.Name,
                     Price = prod.Price,
                     ImageUrl = prod.ImageUrl,
-                    isAvailable = prod.isAvailable
+                    CategoryName = prod.Category.Name,
+                    isAvailable = prod.isAvailable,
+                    Description = prod.Description
                 }
             };
         }
         public async Task<BaseResponse> UpdateProduct(UpdateProductRequestModel model, int id)
         {
             var product = await _productRepository.GetAsync(id);
+            var category = await _categoryRepository.GetAsync(x => x.Name == model.CategoryName);
             if (product == null)
             {
                 return new ProductResponseModel
@@ -132,7 +143,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            var imageName = "";
+            string imageName = null;
             if (model.ImageUrl != null)
             {
                 var imgPath = _webHostEnvironment.WebRootPath;
@@ -149,23 +160,51 @@ namespace Dansnom.Implementations.Services
             product.Name = model.Name.ToLower() ?? product.Name;
             product.Price = model.Price;
             product.ImageUrl = imageName ?? product.ImageUrl;
-            product.isAvailable = model.isAvailable;
+            product.Description = model.Description ?? product.Description;
+            product.CategoryId = category.Id;
 
-            if (model.isAvailable == false)
-            {
-                var production = await _productionRepository.GetProductionsByProductId(id);
-                foreach (var prod in production)
-                {
-                    prod.QuantityRemaining = 0.0m;
-                    await _productionRepository.UpdateAsync(prod);
-                }
-            }
             await _productRepository.UpdateAsync(product);
 
             return new BaseResponse
             {
                 Message = "Product Updeted Successfully",
                 Success = true
+            };
+        }
+        public async Task<ProductsResponseModel> GetProductsByCategoryId(int id)
+        {
+            var category = await _categoryRepository.GetAsync(id);
+            if (category == null)
+            {
+                return new ProductsResponseModel
+                {
+                    Message = "Category not found",
+                    Success = false
+                };
+            }
+            var products = await _productRepository.GetProductsByCategoryIdAsync(id);
+            if (products.Count == 0)
+            {
+                return new ProductsResponseModel
+                {
+                    Message = $"no products found for {category.Name}",
+                    Success = false
+                };
+            }
+            return new ProductsResponseModel
+            {
+                Message = "Products found",
+                Success = true,
+                Data = products.Select(x => new ProductDto
+                {
+                    ProductId = x.Id,
+                    Name = x.Name,
+                    Price = x.Price,
+                    QuantityRemaining =  _productionRepository.GetQuantityRemainingByProductId(x.Id),
+                    Description = x.Description,
+                    ImageUrl = x.ImageUrl,
+                    isAvailable = x.isAvailable
+                }).ToList()
             };
         }
         public async Task<BaseResponse> DeleteProductAsync(int id)
@@ -187,7 +226,7 @@ namespace Dansnom.Implementations.Services
                 Success = true
             };
         }
-        public async Task<ProductsResponseModel> GetProductsReadyForDelivery()       
+        public async Task<ProductsResponseModel> GetAvailableProductsAsync()       
         {
             var update = await UpdateProductsAvailability();
             if (update.Success == false)

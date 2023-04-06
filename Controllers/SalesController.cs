@@ -28,16 +28,6 @@ namespace Project.Controllers
             }
             return Ok(sales);
         }
-        [HttpGet("GetByNameAndDate")]
-        public async Task<IActionResult> GetByNameAndDateAsync([FromQuery]string name,[FromQuery]DateTime dateBought)
-        {
-            var sales = await _salesServices.GetSalesByCustomerNameAndDateAsync(name,dateBought);
-            if(sales.Success == false)
-            {
-                return BadRequest(sales);
-            }
-            return Ok(sales);
-        }
         [HttpGet("GetSalesForTheMonth/{month}/{year}")]
         public async Task<IActionResult> GetSalesForTheMonthOnEachProductAsync(int month,int year)
         {
@@ -48,7 +38,7 @@ namespace Project.Controllers
             }
             return Ok(sales);
         }
-        [HttpGet("GetSalesForThYear/{year}")]
+        [HttpGet("GetSalesForTheYearOnEachProduct/{year}")]
         public async Task<IActionResult> GetSalesForTheYearOnEachProductAsync(int year)
         {
             var sales = await _salesServices.GetSalesForTheYearOnEachProduct(year);

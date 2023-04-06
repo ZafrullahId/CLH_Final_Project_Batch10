@@ -14,9 +14,11 @@ namespace Project.Controllers
     public class ProductionController : ControllerBase
     {
         private readonly IProductionServices _productionServices;   
-        public ProductionController(IProductionServices productionServices)
+        private readonly IProductionRawMaterialService _productionRawMaterialService;
+        public ProductionController(IProductionServices productionServices,IProductionRawMaterialService productionRawMaterialService)
         {
             _productionServices = productionServices;
+            _productionRawMaterialService = productionRawMaterialService;
         }
         [HttpPost("CreateProduction/{id}")]
         public async Task<IActionResult> CreateAsync([FromForm]CreateProductionRequestModel model,[FromQuery]List<int> ids,[FromRoute]int id)
@@ -28,30 +30,30 @@ namespace Project.Controllers
             }
             return Ok(production);
         }
-        [HttpGet("GetAprovedMonthlyProductions/{month}")]
-        public async Task<IActionResult> GetAllAprovedByMonthAsync([FromRoute]int month)
+        [HttpGet("GetAprovedMonthlyProductions/{year}/{month}")]
+        public async Task<IActionResult> GetAllAprovedByMonthAsync([FromRoute]int year,[FromRoute]int month)
         {
-            var production = await _productionServices.GetAllAprovedProductionsByMonthAsync(month);
+            var production = await _productionServices.GetAllAprovedProductionsByMonthAsync(year,month);
             if (production.Success == false)
             {
                 return BadRequest(production);
             }
             return Ok(production);
         }
-        [HttpGet("GetAprovedYearlyProductions/{year}")]
-        public async Task<IActionResult> GetAllAprovedByYearAsync([FromRoute]int year)
+        [HttpGet("GetAprovedProductions")]
+        public async Task<IActionResult> GetAllAprovedByYearAsync()
         {
-            var production = await _productionServices.GetAllAprovedProductionsByYearAsync(year);
+            var production = await _productionServices.GetAllAprovedProductionsAsync();
             if (production.Success == false)
             {
                 return BadRequest(production);
             }
             return Ok(production);
         }
-        [HttpGet("GetYearlyApprovedProductionsOnEachProduct/{year}")]
-        public async Task<IActionResult> GetAllByYearAsync([FromRoute]int year)
+        [HttpGet("GetYearlyApprovedProductionsOnEachProduct")]
+        public async Task<IActionResult> GetAllByYearAsync()
         {
-            var production = await _productionServices.GetAllApprovedProductionsOnEachProductByYearAsync(year);
+            var production = await _productionServices.GetAllApprovedProductionsOnEachProductAsync();
             if (production.Success == false)
             {
                 return BadRequest(production);
@@ -68,7 +70,7 @@ namespace Project.Controllers
             }
             return Ok(production);
         }
-        [HttpGet("GetAllPendingProductionsByMonth/{month}")]
+        [HttpGet("GetAllPendingProductionsByMonth")]
         public async Task<IActionResult> GetAllPendingProductionsByMonthAsync()
         {
             var production = await _productionServices.GetAllPendingProductionsAsync();
@@ -88,21 +90,31 @@ namespace Project.Controllers
             }
             return Ok(production);
         }
-        [HttpPut("UpdateProduction/{id}")]
-        public async Task<IActionResult> UpdateAsync([FromForm]UpdateProductionRequestModel model,[FromRoute] int id)
-        {
-            var production = await _productionServices.UpdateProductionAsync(id,model);
-            if (production.Success == false)
-            {
-                return BadRequest(production);
-            }
-            return Ok(production);
-        }
         [HttpGet("GetByProductId/{id}")]
         public async Task<IActionResult> GetByProductId([FromRoute] int id)
         {
             var production = await _productionServices.GetProductionsByProductIdAsync(id);
             if(production.Success == false)
+            {
+                return BadRequest(production);
+            }
+            return Ok(production);
+        }
+        [HttpGet("GetByRawMaterialId/{id}")]
+        public async Task<IActionResult> GetByGetByRawMaterialIdAsync(int id)
+        {
+             var productions = await _productionRawMaterialService.GetProductionByRwamaterialIdAsync(id);
+            if(productions.Success == false)
+            {
+                return BadRequest(productions);
+            }
+            return Ok(productions);
+        }
+        [HttpPut("UpdateProduction/{id}")]
+        public async Task<IActionResult> UpdateAsync([FromForm]UpdateProductionRequestModel model,[FromRoute] int id)
+        {
+            var production = await _productionServices.UpdateProductionAsync(id,model);
+            if (production.Success == false)
             {
                 return BadRequest(production);
             }

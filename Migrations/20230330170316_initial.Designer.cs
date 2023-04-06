@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Project.Migrations
 {
     [DbContext(typeof(DansnomApplicationContext))]
-    [Migration("20230314123517_initial")]
+    [Migration("20230330170316_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,9 @@ namespace Project.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("AdditionalDetails")
+                        .HasColumnType("text");
 
                     b.Property<string>("City")
                         .HasColumnType("text");
@@ -105,6 +108,44 @@ namespace Project.Migrations
                         .IsUnique();
 
                     b.ToTable("Admins");
+                });
+
+            modelBuilder.Entity("Dansnom.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.Chat", b =>
@@ -399,9 +440,6 @@ namespace Project.Migrations
                     b.Property<DateTime>("LastModifiedOn")
                         .HasColumnType("datetime");
 
-                    b.Property<decimal>("QuantityBought")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<bool>("isDelivered")
                         .HasColumnType("tinyint(1)");
 
@@ -418,6 +456,9 @@ namespace Project.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<int>("CreatedBy")
@@ -458,6 +499,8 @@ namespace Project.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Products");
                 });
 
@@ -493,6 +536,9 @@ namespace Project.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("QuantityBought")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -745,15 +791,10 @@ namespace Project.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("Sales");
                 });
@@ -923,6 +964,17 @@ namespace Project.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Product", b =>
+                {
+                    b.HasOne("Dansnom.Entities.Category", "Category")
+                        .WithMany("Product")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.ProductOrders", b =>
                 {
                     b.HasOne("Dansnom.Entities.Order", "Order")
@@ -1010,15 +1062,7 @@ namespace Project.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Dansnom.Entities.Product", "Product")
-                        .WithMany("Sales")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.VerificationCode", b =>
@@ -1039,6 +1083,11 @@ namespace Project.Migrations
                     b.Navigation("Production");
 
                     b.Navigation("RawMaterial");
+                });
+
+            modelBuilder.Entity("Dansnom.Entities.Category", b =>
+                {
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.Customer", b =>
@@ -1076,8 +1125,6 @@ namespace Project.Migrations
                     b.Navigation("Production");
 
                     b.Navigation("ProductOrders");
-
-                    b.Navigation("Sales");
                 });
 
             modelBuilder.Entity("Dansnom.Entities.Production", b =>

@@ -8,6 +8,7 @@ namespace Dansnom.Dtos
         public string ImageUrl { get; set; }
         public bool isAvailable { get; set; }
         public string Description { get; set; }
+        public string CategoryName { get; set; }
         public decimal QuantityRemaining { get; set; }
     }
 }

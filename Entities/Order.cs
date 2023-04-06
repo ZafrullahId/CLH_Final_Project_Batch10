@@ -5,7 +5,6 @@ namespace Dansnom.Entities
 {
     public class Order : AuditableEntity
     {
-        public decimal QuantityBought { get; set; }
         public bool isDelivered { get; set; }
         public int CustomerId { get; set; }
         public Customer Customer { get; set; }
