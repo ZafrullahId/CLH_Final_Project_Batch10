@@ -163,7 +163,8 @@ namespace Dansnom.Implementations.Services
                         FullName = order[0].Order.Customer.FullName,
                         Username = order[0].Order.Customer.User.Username,
                         PhoneNumber = order[0].Order.Customer.PhoneNumber,
-                        Email = order[0].Order.Customer.User.Email
+                        Email = order[0].Order.Customer.User.Email,
+                        ImageUrl = sale.Order.Customer.User.ProfileImage
                     },
                     AddressDto = new AddressDto
                     {
@@ -184,12 +185,14 @@ namespace Dansnom.Implementations.Services
                             isAvailable = x.Product.isAvailable,
                             Description = x.Product.Description
                         },
+                        
                         QuantityBought = x.QuantityBought,
                         OrderedDate = x.Order.CreatedOn.ToLongDateString(),
                         DeleveredDate = x.Order.LastModifiedOn.ToLongDateString(),
 
                     }).ToList(),
-                    isDelivered = order[0].Order.isDelivered
+                    isDelivered = order[0].Order.isDelivered,
+                    OrderId = sale.OrderId,
                 };
                 productOrdersDtos.Add(productOrder);
             }
@@ -202,7 +205,8 @@ namespace Dansnom.Implementations.Services
                     OrderDtos = x.OrderDtos,
                     AmountPaid = x.OrderDtos.Sum(x => (x.ProductDto.Price * x.QuantityBought)),
                     CustomerDto = x.CustomerDto,
-                    AddressId = x.AddressDto.AddressId
+                    AddressId = x.AddressDto.AddressId,
+                    OrderId = x.OrderId
                 }).ToList()
             };
         }

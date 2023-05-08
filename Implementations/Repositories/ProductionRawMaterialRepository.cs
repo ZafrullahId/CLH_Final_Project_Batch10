@@ -97,6 +97,7 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.ProductionRawMaterials
             .Include(x => x.RawMaterial)
+            .Include(x => x.Production.Product)
             .Include(c => c.Production)
             .ThenInclude(x => x.Admin)
             .Where(x => x.ProductionId == id)

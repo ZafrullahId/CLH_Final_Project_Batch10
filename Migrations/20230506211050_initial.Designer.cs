@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Project.Migrations
 {
     [DbContext(typeof(DansnomApplicationContext))]
-    [Migration("20230330170316_initial")]
+    [Migration("20230506211050_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -313,6 +313,9 @@ namespace Project.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ProfileImage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
                         .HasColumnType("text");
 
                     b.Property<string>("Username")

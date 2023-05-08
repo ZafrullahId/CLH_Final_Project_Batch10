@@ -68,7 +68,7 @@ namespace Project.Controllers
             }
             return Ok(RawMaterial);
         }
-        [HttpGet("GetAllAprovedRawMaterial")]
+        [HttpGet("GetAllApprovedRawMaterial")]
         public async Task<IActionResult> GetAllApprovedRawMaterialAsync()
         {
             var RawMaterial = await _rawMaterialServuce.GetAllApprovedRawMaterialAsync();
@@ -158,6 +158,16 @@ namespace Project.Controllers
                 return BadRequest(expense);
             }
             return Ok(expense);
+        }
+        [HttpDelete("DeleteRequest/{id}")]
+        public async Task<IActionResult> DeleteRequestAsync([FromRoute] int id)
+        {
+            var request = await _rawMaterialServuce.DeleteRawMaterialRequestAsync(id);
+            if (request.Success == false)
+            {
+                return BadRequest(request);
+            }
+            return Ok(request);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.RawMaterials.Include(x => x.Admin)
             .ThenInclude(x => x.User)
+            .Where(x => x.IsDeleted == false)
             .OrderByDescending(x => x.CreatedOn)
             .ToListAsync();
         }
@@ -57,7 +58,7 @@ namespace Dansnom.Implementations.Repositories
         public async Task<List<RawMaterial>> GetAllRejectedRawMaterialForTheYearAsync(int year)
         {
             return await _Context.RawMaterials
-            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Rejected)
+            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Rejected && x.IsDeleted == false) 
             .ToListAsync();
         }
         public async Task<List<RawMaterial>> GetAllAprovedRawMaterialForTheMonthAsync(int month,int year)
@@ -65,26 +66,26 @@ namespace Dansnom.Implementations.Repositories
              return await _Context.RawMaterials
              .Include(x => x.Admin)
              .ThenInclude(x => x.User)
-            .Where(x => x.CreatedOn.Month == month && x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Approved)
+            .Where(x => x.CreatedOn.Month == month && x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Approved && x.IsDeleted == false)
             .ToListAsync();
         }
         public async Task<List<RawMaterial>> GetAllRejectedRawMaterialForTheMonthAsync(int month)
         {
             return await _Context.RawMaterials
-            .Where(x => x.CreatedOn.Month == month && x.ApprovalStatus == ApprovalStatus.Rejected)
+            .Where(x => x.CreatedOn.Month == month && x.ApprovalStatus == ApprovalStatus.Rejected && x.IsDeleted == false)
             .ToListAsync();
         }
          public async Task<List<RawMaterial>> GetAllPendingRawMaterialForTheYearAsync(int year)
         {
             return await _Context.RawMaterials
-            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Pending)
+            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Pending && x.IsDeleted == false)
             .ToListAsync();
         }
         public async Task<List<RawMaterial>> GetAllPendingRawMaterialsAsync()
         {
             return await _Context.RawMaterials.Include(x => x.Admin)
             .ThenInclude(x => x.User)
-            .Where(x => x.ApprovalStatus == ApprovalStatus.Pending)
+            .Where(x => x.ApprovalStatus == ApprovalStatus.Pending && x.IsDeleted == false)
             .ToListAsync();
         }
         public async Task<List<RawMaterial>> GetAllApprovedRawMaterialsAsync()

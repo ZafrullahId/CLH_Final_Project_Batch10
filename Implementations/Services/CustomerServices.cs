@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System;
 using DansnomEmailServices;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dansnom.Implementations.Services
 {
@@ -43,8 +44,6 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-
-
 
             var imageName = "";
             if (model.ImageUrl != null)
@@ -93,7 +92,7 @@ namespace Dansnom.Implementations.Services
                 User = addUser,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
-                IsDeleted = false
+                IsDeleted = false,
             };
             var cust = await _customerRepository.CreateAsync(customer);
 

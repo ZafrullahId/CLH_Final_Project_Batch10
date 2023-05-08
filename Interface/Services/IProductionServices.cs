@@ -8,17 +8,19 @@ namespace Dansnom.Interface.Services
 {
     public interface IProductionServices
     {
+        Task<BaseResponse> RejectProduction(int id, RejectRequestRequestModel model);
          Task<BaseResponse> AproveProduction(int id);
-        Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids, int adminId);
-        Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductByMonthAsync(int month);
-        Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductAsync();
+        Task<ProductionsResponseModel> GetAllProductionAsync();
+        Task<ProductionResponseModel> GetProductionById(int id);
         Task<ProductionsResponseModel> GetAllAprovedProductionsAsync();
-        Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int year, int month);
         Task<ProductionsResponseModel> GetAllPendingProductionsAsync();
         Task<ProductionsResponseModel> GetAllRejectedProductionsAsync();
-        Task<ProductionsResponseModel> GetProductionsByDateAsync(string date);
         Task<ProductionsResponseModel> GetProductionsByProductIdAsync(int id);
-        Task<BaseResponse> RejectProduction(int id);
+        Task<ProductionsResponseModel> GetProductionsByDateAsync(string date);
+        Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductAsync();
         Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model);
+        Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int year, int month);
+        Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductByMonthAsync(int month);
+        Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids, int adminId);
     }
 }

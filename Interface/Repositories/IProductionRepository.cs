@@ -15,6 +15,7 @@ namespace Dansnom.Interface.Repositories
         Task<List<Production>> GetAllPendingProductionsAsync();
         Task<List<Production>> GetAllAprovedProductionsByMonthAsync(int year, int month);
         Task<List<Production>> GetAllRejectedProduction();
+        Task<List<Production>> GetAllProductionsAsync();
     }
 
 }

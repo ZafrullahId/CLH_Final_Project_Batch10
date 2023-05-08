@@ -40,7 +40,7 @@ namespace Project.Controllers
             }
             return Ok(production);
         }
-        [HttpGet("GetAprovedProductions")]
+        [HttpGet("GetApprovedProductions")]
         public async Task<IActionResult> GetAllAprovedByYearAsync()
         {
             var production = await _productionServices.GetAllAprovedProductionsAsync();
@@ -120,7 +120,7 @@ namespace Project.Controllers
             }
             return Ok(production);
         }
-        [HttpPut("AproveProduction/{id}")]
+        [HttpPut("ApproveProduction/{id}")]
         public async Task<IActionResult> ApproveAsync([FromRoute] int id)
         {
             var production = await _productionServices.AproveProduction(id);
@@ -131,14 +131,34 @@ namespace Project.Controllers
             return Ok(production);
         }
         [HttpPut("RejectProduction/{id}")]
-        public async Task<IActionResult> RejectAsync([FromRoute] int id)
+        public async Task<IActionResult> RejectAsync([FromRoute] int id, [FromBody]RejectRequestRequestModel model)
         {
-            var production = await _productionServices.RejectProduction(id);
+            var production = await _productionServices.RejectProduction(id, model);
             if(production.Success == false)
             {
                 return BadRequest(production);
             }
             return Ok(production);
+        }
+        [HttpGet("GetAllProductions")]
+        public async Task<IActionResult> GetAllProductionsAsync()
+        {
+            var productions = await _productionServices.GetAllProductionAsync();
+            if (productions.Success == false)
+            {
+                return BadRequest(productions);
+            }
+            return Ok(productions);
+        }
+        [HttpGet("GetProduction/{id}")]
+        public async Task<IActionResult> GetProductionAsync(int id)
+        {
+            var productions = await _productionServices.GetProductionById(id);
+            if (productions.Success == false)
+            {
+                return BadRequest(productions);
+            }
+            return Ok(productions);
         }
     }
 }

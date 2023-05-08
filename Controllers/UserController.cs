@@ -40,5 +40,15 @@ namespace Project.Controllers
             }
             return Ok(users);
         }
+        [HttpGet("GetUserByToken")]
+        public async Task<IActionResult> GetUserByTokenAsync([FromQuery]string token)
+        {
+            var user = await _userServices.GetUserByTokenAsync(token);
+            if (user.Success == false)
+            {
+                return BadRequest(user);
+            }
+            return Ok(user);
+        }
     }
 }

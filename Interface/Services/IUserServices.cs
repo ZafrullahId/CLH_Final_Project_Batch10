@@ -8,5 +8,6 @@ namespace Dansnom.Interface.Services
     {
         Task<UserResponseModel> Login(LoginRequestModel model);
         Task<UsersResponseModel> GetUsersByRoleAsync(string role);
+        Task<UserResponseModel> GetUserByTokenAsync(string token);
     }
 }

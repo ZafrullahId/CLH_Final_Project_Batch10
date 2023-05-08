@@ -461,6 +461,14 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
+            if (order.isDelivered == true)
+            {
+                return new BaseResponse
+                {
+                    Message = "Order already delevered",
+                    Success = false
+                };
+            }
             order.isDelivered = true;
             order.LastModifiedOn = DateTime.Now;
             var sale = await _salesServices.CreateSales(id);

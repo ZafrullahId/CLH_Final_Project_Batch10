@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dansnom.Context;
 using Dansnom.Entities;
@@ -20,6 +22,10 @@ namespace Dansnom.Implementations.Repositories
             .Include(x => x.Role).SingleOrDefaultAsync(x => x.UserId == id);
             return role.Role;
         }
-
+        public async Task<List<Role>> GetRoleAsync()
+        {
+            return await _Context.Roles
+            .Where(x => x.IsDeleted == false).ToListAsync();
+        }
     } 
 }

@@ -158,6 +158,7 @@ namespace Dansnom.Implementations.Services
                     QuantityRemaining = prodtion.QuantityRemaining,
                     QuantityProduced = prodtion.QuantityProduced,
                     QuantityRequest = prodtion.QuantityRequest,
+                    ApprovalStatus = prodtion.ApprovalStatus.ToString(),
                     RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
                         Id = x.RawMaterial.Id,
@@ -166,6 +167,7 @@ namespace Dansnom.Implementations.Services
                         QuantiityBought = x.RawMaterial.QuantiityBought,
                         QuantiityRemaining = x.RawMaterial.QuantiityRemaining,
                         StringApprovalStatus = x.RawMaterial.ApprovalStatus.ToString(),
+                        EnumApprovalStatus = x.RawMaterial.ApprovalStatus
                     }).ToList()
                 };
                 ProductionDto.Add(productionDto);
@@ -181,7 +183,8 @@ namespace Dansnom.Implementations.Services
                     ProductionDate = x.ProductionDate,
                     QuantityProduced = x.QuantityProduced,
                     QuantityRemaining = x.QuantityRemaining,
-                    QuantityRequest = x.QuantityRequest
+                    QuantityRequest = x.QuantityRequest,
+                    ApprovalStatus = x.ApprovalStatus
                 }).ToList()
             };
         }
@@ -577,6 +580,67 @@ namespace Dansnom.Implementations.Services
                 }).ToList()
             };
         }
+        public async Task<ProductionsResponseModel> GetAllProductionAsync()
+        {
+            var productions = await _productionRepository.GetAllProductionsAsync();
+            if (productions.Count == 0)
+            {
+                return new ProductionsResponseModel
+                {
+                    Message = "No Production request yet",
+                    Success = false
+                };
+            }
+            foreach (var item in productions)
+            {
+                
+                if ((DateTime.Now - item.CreatedOn).TotalSeconds < 60)
+                {
+                    item.RequestTime = (int)(DateTime.Now - item.CreatedOn).TotalSeconds + " " + "Sec ago";
+                }
+                if ((DateTime.Now - item.CreatedOn).TotalSeconds > 60 && (DateTime.Now - item.CreatedOn).TotalHours < 1)
+                {
+                    item.RequestTime = (int)(DateTime.Now - item.CreatedOn).TotalMinutes + " " + "Mins ago";
+                }
+                if ((DateTime.Now - item.CreatedOn).TotalMinutes > 60 && (DateTime.Now - item.CreatedOn).TotalDays < 1)
+                {
+                    item.RequestTime = (int)(DateTime.Now - item.CreatedOn).TotalHours + " " + "Hours ago";
+                }
+                if ((DateTime.Now - item.CreatedOn).TotalHours > 24 && (DateTime.Now - item.CreatedOn).TotalDays < 30)
+                {
+                    item.RequestTime = (int)(DateTime.Now - item.CreatedOn).TotalDays + " " + "Days ago";
+                }
+                if ((DateTime.Now - item.CreatedOn).TotalDays > 30 && (DateTime.Now - item.CreatedOn).TotalDays <= 365)
+                {
+                    item.RequestTime = ((int)(DateTime.Now - item.CreatedOn).TotalDays / 30) + " " + "Months ago";
+                }
+            }
+            return new ProductionsResponseModel
+            {
+                Success = true,
+                Data = productions.Select(x => new ProductionDto
+                {
+                    Admin = new UserDto
+                    {
+                        UserName = x.Admin.User.Username,
+                        Image = x.Admin.User.ProfileImage
+                    },
+                    ProductionId = x.Id,
+                    CreatedTime = x.CreatedOn.ToLongDateString(),   
+                    ApprovalStatus = x.ApprovalStatus.ToString(),
+                    PostedTime = x.RequestTime,
+                    ProductionDate = x.ProductionDate,
+                    QuantityProduced = x.QuantityProduced,
+                    QuantityRemaining = x.QuantityRemaining,
+                    QuantityRequest = x.QuantityRequest,
+                    ProductDto = new ProductDto
+                    {
+                        Name = x.Product.Name,
+                        ImageUrl = x.Product.ImageUrl
+                    }
+                }).ToList()
+            };
+        }
         public async Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model)
         {
             var production = await _productionRepository.GetAsync(x => x.Id == id);
@@ -644,7 +708,7 @@ namespace Dansnom.Implementations.Services
                 Success = true
             };
         }
-        public async Task<BaseResponse> RejectProduction(int id)
+        public async Task<BaseResponse> RejectProduction(int id, RejectRequestRequestModel model)
         {
             var production = await _productionRepository.GetAsync(id);
             if (production == null)
@@ -656,12 +720,44 @@ namespace Dansnom.Implementations.Services
                 };
             }
             production.ApprovalStatus = ApprovalStatus.Rejected;
+            production.AdditionalMessage = model.Message;
             await _productionRepository.UpdateAsync(production);
             await _productServices.UpdateProductsAvailability();
             return new BaseResponse
             {
                 Message = "Production rejected successfully",
                 Success = true
+            };
+        }
+        public async Task<ProductionResponseModel> GetProductionById(int id)
+        {
+            var production = await _productionRawMaterialRepository.GetProductionsById(id);
+            if (production.Count == 0)
+            {
+                return new ProductionResponseModel
+                {
+                    Message = "Production not found",
+                    Success = false
+                };
+            }
+            return new ProductionResponseModel
+            {
+                Message = "Production found successfully",
+                Success = true,
+                Data = new ProductionDto
+                {
+                    ProductDto = new ProductDto
+                    {
+                        Name = production[0].Production.Product.Name
+                    },
+                    QuantityRequest = production[0].Production.QuantityRequest,
+                    QuantityProduced = production[0].Production.QuantityProduced,
+                    AdditionalMessage = production[0].Production.AdditionalMessage,
+                    RawMaterialDto = production.Select(x => new RawMaterialDto
+                    {
+                        Name = x.RawMaterial.Name
+                    }).ToList()
+                }
             };
         }
     }

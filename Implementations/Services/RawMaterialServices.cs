@@ -521,7 +521,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<BaseResponse> ApproveRawMaterialAsync(int id)
         {
-            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id);
+            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id && x.IsDeleted == false);
             if (rawMaterial == null)
             {
                 return new BaseResponse
@@ -540,7 +540,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<BaseResponse> RejectRawMaterialAsync(int id,RejectRequestRequestModel model)
         {
-            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id);
+            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id && x.IsDeleted == false);
             if (rawMaterial == null)
             {
                 return new BaseResponse
@@ -568,7 +568,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<BaseResponse> UpdateRawMaterialRequestAsync(int id, UpdateRawMaterialRequestModel model)
         {
-            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id);
+            var rawMaterial = await _rawMaterialRepository.GetAsync(x => x.Id == id && x.IsDeleted == false);
             if (rawMaterial.ApprovalStatus == ApprovalStatus.Approved)
             {
                 return new BaseResponse
@@ -587,6 +587,35 @@ namespace Dansnom.Implementations.Services
             return new BaseResponse
             {
                 Message = "Successfully Updated",
+                Success = true
+            };
+        }
+
+        public async Task<BaseResponse> DeleteRawMaterialRequestAsync(int id)
+        {
+            var rawMaterialRequest = await _rawMaterialRepository.GetAsync(id);
+            
+            if (rawMaterialRequest == null)
+            {
+                return new BaseResponse
+                {
+                    Message = "Request not found",
+                    Success = false
+                };
+            }
+            if (rawMaterialRequest.ApprovalStatus == ApprovalStatus.Approved)
+            {
+                return new BaseResponse
+                {
+                    Message = "This request has been approved and cannot be deleted",
+                    Success = false
+                };
+            }
+            rawMaterialRequest.IsDeleted = true;
+            await _rawMaterialRepository.UpdateAsync(rawMaterialRequest);
+            return new BaseResponse
+            {
+                Message = "Request Successfuly Deleted",
                 Success = true
             };
         }

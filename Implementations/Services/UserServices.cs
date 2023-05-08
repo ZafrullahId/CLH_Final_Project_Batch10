@@ -17,7 +17,7 @@ namespace Dansnom.Implementations.Services
         private readonly IJWTAuthenticationManager _tokenService;
         private string generatedToken = null;
         private readonly IUserRepository _userRepository;
-        public UserServices(IUserRepository userRepository, IConfiguration config,IJWTAuthenticationManager tokenService)
+        public UserServices(IUserRepository userRepository, IConfiguration config, IJWTAuthenticationManager tokenService)
         {
             _userRepository = userRepository;
             _config = config;
@@ -26,7 +26,7 @@ namespace Dansnom.Implementations.Services
         public async Task<UserResponseModel> Login(LoginRequestModel model)
         {
 
-            var userRole = await _userRepository.LoginAsync(model.Email,model.Password);
+            var userRole = await _userRepository.LoginAsync(model.Email, model.Password);
             if (userRole != null)
             {
                 var userDto = new UserDto
@@ -46,7 +46,7 @@ namespace Dansnom.Implementations.Services
                         Role = userRole.Role.Name,
                         UserName = userRole.User.Username,
                         Image = userRole.User.ProfileImage,
-                        Token = generatedToken = _tokenService.GenerateToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(),userDto)               
+                        Token = generatedToken = _tokenService.GenerateToken(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), userDto)
                     }
                 };
             }
@@ -56,6 +56,7 @@ namespace Dansnom.Implementations.Services
                 Message = "Loggin Failed",
             };
         }
+
         public async Task<UsersResponseModel> GetUsersByRoleAsync(string role)
         {
             var users = await _userRepository.GetUserByRoleAsync(role.ToLower());
@@ -67,7 +68,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            
+
             return new UsersResponseModel
             {
                 Data = users.Select(x => new UserDto
@@ -79,6 +80,27 @@ namespace Dansnom.Implementations.Services
                 }).ToList(),
                 Message = $"Users with {role} found successfully",
                 Success = true
+            };
+        }
+        public async Task<UserResponseModel> GetUserByTokenAsync(string token)
+        {
+            var user = await _userRepository.GetAsync(x => x.Token == token);
+            if (user == null)
+            {
+                return new UserResponseModel
+                {
+                    Message = "User not found",
+                    Success = true
+                };
+            }
+            return new UserResponseModel
+            {
+                Message = "User found successfully",
+                Success = true,
+                Data = new UserDto
+                {
+                    Email = user.Email,
+                }
             };
         }
     }

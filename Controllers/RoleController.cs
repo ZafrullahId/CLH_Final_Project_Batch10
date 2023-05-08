@@ -19,7 +19,7 @@ namespace Project.Controllers
             _roleService = roleServices;
         }
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateAsync([FromForm]CreateRoleRequestModel request)
+        public async Task<IActionResult> CreateAsync([FromBody]CreateRoleRequestModel request)
         {
            var isSuccessful = await _roleService.CreateRole(request);
             if (isSuccessful.Success == false)

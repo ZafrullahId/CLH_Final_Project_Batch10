@@ -83,6 +83,7 @@ namespace Project.Migrations
                     Email = table.Column<string>(type: "text", nullable: true),
                     Password = table.Column<string>(type: "text", nullable: true),
                     Username = table.Column<string>(type: "text", nullable: true),
+                    Token = table.Column<string>(type: "text", nullable: true),
                     ProfileImage = table.Column<string>(type: "text", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),

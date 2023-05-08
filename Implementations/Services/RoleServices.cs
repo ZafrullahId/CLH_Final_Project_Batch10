@@ -42,7 +42,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<RolesResponseModel> GetAllRoleAsync()
         {
-            var role = await _roleRepository.GetAllAsync();
+            var role = await _roleRepository.GetRoleAsync();
             if (role == null)
             {
                 return new RolesResponseModel

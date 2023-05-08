@@ -74,5 +74,15 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.ApprovalStatus == ApprovalStatus.Approved && x.CreatedOn.Year == year && x.CreatedOn.Month == month)
             .ToListAsync();
         }
+        public async Task<List<Production>> GetAllProductionsAsync()
+        {
+            return await _Context.Productions
+            .Include(c => c.Product)
+            .Include(x => x.Admin)
+            .ThenInclude(x => x.User)
+            .Where(x => x.IsDeleted == false)
+            .OrderByDescending(x => x.CreatedOn)
+            .ToListAsync();
+        }
     }
 }
