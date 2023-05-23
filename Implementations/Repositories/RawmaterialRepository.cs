@@ -11,7 +11,7 @@ using Dansnom.Enums;
 
 namespace Dansnom.Implementations.Repositories
 {
-    public class RawMaterialRepository : BaseRepository<RawMaterial> , IRawMaterialRepository
+    public class RawMaterialRepository : BaseRepository<RawMaterial>, IRawMaterialRepository
     {
         public RawMaterialRepository(DansnomApplicationContext Context)
         {
@@ -37,7 +37,7 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.CreatedOn.Year == DateTime.Now.Year && x.ApprovalStatus == ApprovalStatus.Approved)
             .SumAsync(x => x.Cost);
         }
-        public async Task<decimal> GetSumOfAprovedRawMaterialForTheMonthAsync(int  month, int year)
+        public async Task<decimal> GetSumOfAprovedRawMaterialForTheMonthAsync(int month, int year)
         {
             return await _Context.RawMaterials
             .Where(x => x.CreatedOn.Month == month && x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Approved)
@@ -58,16 +58,16 @@ namespace Dansnom.Implementations.Repositories
         public async Task<List<RawMaterial>> GetAllRejectedRawMaterialForTheYearAsync(int year)
         {
             return await _Context.RawMaterials
-            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Rejected && x.IsDeleted == false) 
+            .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Rejected && x.IsDeleted == false)
             .ToListAsync();
         }
-        public async Task<List<RawMaterial>> GetAllAprovedRawMaterialForTheMonthAsync(int month,int year)
+        public async Task<List<RawMaterial>> GetAllAprovedRawMaterialForTheMonthAsync(int month, int year)
         {
-             return await _Context.RawMaterials
-             .Include(x => x.Admin)
-             .ThenInclude(x => x.User)
-            .Where(x => x.CreatedOn.Month == month && x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Approved && x.IsDeleted == false)
-            .ToListAsync();
+            return await _Context.RawMaterials
+            .Include(x => x.Admin)
+            .ThenInclude(x => x.User)
+           .Where(x => x.CreatedOn.Month == month && x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Approved && x.IsDeleted == false)
+           .ToListAsync();
         }
         public async Task<List<RawMaterial>> GetAllRejectedRawMaterialForTheMonthAsync(int month)
         {
@@ -75,7 +75,7 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.CreatedOn.Month == month && x.ApprovalStatus == ApprovalStatus.Rejected && x.IsDeleted == false)
             .ToListAsync();
         }
-         public async Task<List<RawMaterial>> GetAllPendingRawMaterialForTheYearAsync(int year)
+        public async Task<List<RawMaterial>> GetAllPendingRawMaterialForTheYearAsync(int year)
         {
             return await _Context.RawMaterials
             .Where(x => x.CreatedOn.Year == year && x.ApprovalStatus == ApprovalStatus.Pending && x.IsDeleted == false)
@@ -95,6 +95,16 @@ namespace Dansnom.Implementations.Repositories
             .Where(x => x.ApprovalStatus == ApprovalStatus.Approved)
             .ToListAsync();
         }
-        
-    } 
+        public async Task<List<RawMaterial>> GetAllAvailableRawMaterialAsync()
+        {
+            return await _Context.RawMaterials
+            .Where(x => x.ApprovalStatus == ApprovalStatus.Approved && x.QuantiityRemaining != 0)
+            .ToListAsync();
+        }
+        public async Task<List<RawMaterial>> GetRawMaterialsByNameAsync(string name)
+        {
+            return await _Context.RawMaterials
+            .Where(x => x.Name == name).ToListAsync();
+        }
+    }
 }

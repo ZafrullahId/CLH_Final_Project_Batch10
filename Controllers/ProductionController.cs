@@ -111,9 +111,9 @@ namespace Project.Controllers
             return Ok(productions);
         }
         [HttpPut("UpdateProduction/{id}")]
-        public async Task<IActionResult> UpdateAsync([FromForm]UpdateProductionRequestModel model,[FromRoute] int id)
+        public async Task<IActionResult> UpdateAsync([FromForm]UpdateProductionRequestModel model,[FromQuery]List<int> ids,[FromRoute] int id)
         {
-            var production = await _productionServices.UpdateProductionAsync(id,model);
+            var production = await _productionServices.UpdateProductionAsync(id,model,ids);
             if (production.Success == false)
             {
                 return BadRequest(production);
@@ -159,6 +159,16 @@ namespace Project.Controllers
                 return BadRequest(productions);
             }
             return Ok(productions);
+        }
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            var production = await _productionServices.DeleteAsync(id);
+            if (production.Success == false)
+            {
+                return BadRequest(production);
+            }
+            return Ok(production);
         }
     }
 }

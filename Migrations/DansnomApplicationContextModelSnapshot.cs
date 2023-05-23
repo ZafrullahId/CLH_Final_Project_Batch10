@@ -108,6 +108,46 @@ namespace Project.Migrations
                     b.ToTable("Admins");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Carts");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -417,6 +457,9 @@ namespace Project.Migrations
                     b.Property<int>("AddressId")
                         .HasColumnType("int");
 
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
@@ -447,6 +490,9 @@ namespace Project.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("CartId")
+                        .IsUnique();
 
                     b.HasIndex("CustomerId");
 
@@ -886,6 +932,17 @@ namespace Project.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Cart", b =>
+                {
+                    b.HasOne("Dansnom.Entities.Product", "Product")
+                        .WithMany("Carts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Chat", b =>
                 {
                     b.HasOne("Dansnom.Entities.Admin", "Sender")
@@ -954,6 +1011,12 @@ namespace Project.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Dansnom.Entities.Cart", "Cart")
+                        .WithOne("Order")
+                        .HasForeignKey("Dansnom.Entities.Order", "CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Dansnom.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
@@ -961,6 +1024,8 @@ namespace Project.Migrations
                         .IsRequired();
 
                     b.Navigation("Address");
+
+                    b.Navigation("Cart");
 
                     b.Navigation("Customer");
                 });
@@ -1086,6 +1151,11 @@ namespace Project.Migrations
                     b.Navigation("RawMaterial");
                 });
 
+            modelBuilder.Entity("Dansnom.Entities.Cart", b =>
+                {
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Dansnom.Entities.Category", b =>
                 {
                     b.Navigation("Product");
@@ -1123,6 +1193,8 @@ namespace Project.Migrations
 
             modelBuilder.Entity("Dansnom.Entities.Product", b =>
                 {
+                    b.Navigation("Carts");
+
                     b.Navigation("Production");
 
                     b.Navigation("ProductOrders");

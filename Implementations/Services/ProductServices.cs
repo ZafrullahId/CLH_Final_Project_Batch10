@@ -100,6 +100,7 @@ namespace Dansnom.Implementations.Services
                     QuantityRemaining =  _productionRepository.GetQuantityRemainingByProductId(x.Id),
                     Description = x.Description,
                     ImageUrl = x.ImageUrl,
+                    CategoryName = x.Category.Name,
                     isAvailable = x.isAvailable
                 }).ToList()
             };
@@ -127,7 +128,8 @@ namespace Dansnom.Implementations.Services
                     ImageUrl = prod.ImageUrl,
                     CategoryName = prod.Category.Name,
                     isAvailable = prod.isAvailable,
-                    Description = prod.Description
+                    Description = prod.Description,
+
                 }
             };
         }

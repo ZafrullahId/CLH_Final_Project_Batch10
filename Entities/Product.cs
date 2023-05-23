@@ -15,5 +15,6 @@ namespace Dansnom.Entities
         public int CategoryId { get; set; }
         public List<ProductOrders> ProductOrders { get; set; } = new List<ProductOrders>();
         public List<Production> Production { get; set; } = new List<Production>();
+        public List<Cart> Carts { get; set; }
     }
 }

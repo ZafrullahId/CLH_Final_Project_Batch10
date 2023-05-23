@@ -22,8 +22,8 @@ namespace Dansnom.Implementations.Services
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IRoleRepository _roleRepository;
         private readonly IMailServices _mailService;
-        private readonly IverificationCodeRepository _verificationCodeRepository;
-        public CustomerServices(ICustomerRepository customerRepository, IUserRepository userRepository, IWebHostEnvironment webHostEnvironment, IRoleRepository roleRepository, IMailServices mailServices, IverificationCodeRepository verificationCodeRepository)
+        private readonly IVerificationCodeRepository _verificationCodeRepository;
+        public CustomerServices(ICustomerRepository customerRepository, IUserRepository userRepository, IWebHostEnvironment webHostEnvironment, IRoleRepository roleRepository, IMailServices mailServices, IVerificationCodeRepository verificationCodeRepository)
         {
             _customerRepository = customerRepository;
             _userRepository = userRepository;
@@ -35,8 +35,8 @@ namespace Dansnom.Implementations.Services
         public async Task<CustomerReponseModel> RegisterAsync(CreateCustomerRequestModel model)
         {
             int random = new Random().Next(10000, 99999);
-            var exist = await _customerRepository.ExistsAsync(x => x.User.Email == model.Email);
-            if (exist)
+            var exist = await _customerRepository.ExistsAsync(x => x.User.Email == model.Email && x.User.IsDeleted == false);
+            if (exist) 
             {
                 return new CustomerReponseModel
                 {
@@ -127,36 +127,6 @@ namespace Dansnom.Implementations.Services
                 }
             };
         }
-
-        public async Task<BaseResponse> VerifyCode(int id,int verificationcode)
-        {
-            var code = await _verificationCodeRepository.GetAsync(x => x.Customer.Id == id && x.Code == verificationcode);
-            if (code == null)
-            {
-                return new BaseResponse
-                {
-                    Message = "invalid code",
-                    Success = false
-                };
-            }
-            else if ((DateTime.Now - code.CreatedOn ).TotalSeconds > 200)
-            {
-                return new BaseResponse
-                {
-                    Message = "Code Expired",
-                    Success = false,
-                };
-            }
-            var customer = await _customerRepository.GetCustomerByIdAsync(id);
-            customer.User.IsDeleted = false;
-            await _customerRepository.UpdateAsync(customer);
-            return new BaseResponse
-            {
-                Message = "Email Successfully Verified",
-                Success = true,
-            };
-        }
-
         public async Task<CustomerReponseModel> UpdateProfile(UpdateCustomerRequestModel model, int id)
         {
             var customer = await _customerRepository.GetCustomerByUserIdAsync(id);

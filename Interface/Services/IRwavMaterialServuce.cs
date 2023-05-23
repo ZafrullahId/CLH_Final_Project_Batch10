@@ -11,6 +11,7 @@ namespace Dansnom.Interface.Services
         Task<RawMaterialsResponseModel> GetAllRawMaterials();
         Task<BaseResponse> DeleteRawMaterialRequestAsync(int id);
         Task<RawMaterialsResponseModel> GetAllPendingRawMaterial();
+        Task<RawMaterialsResponseModel> GetAvailableRawMaterialsAsync();
         Task<RawMaterialsResponseModel> GetAllApprovedRawMaterialAsync();
         Task<RawMaterialResponseModel> CalculateRawMaterialCostForThYear();
         Task<RawMaterialResponseModel> CalculateRawMaterialCostForTheMonth();

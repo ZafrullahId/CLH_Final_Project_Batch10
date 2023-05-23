@@ -20,7 +20,8 @@ namespace Dansnom.Implementations.Services
         private readonly IProductOrdersRepository _productOrdersRepository;
         private readonly IProductRepository _productRepository;
         private readonly IProductionRepository _productionRepository;
-        public OrderServices(IOrderRepository orderRepository, ICustomerRepository customerRepository, ISalesServices salesServices, IProductOrdersRepository productOrdersRepository, IProductRepository productRepository, IProductionRepository productionRepository)
+        private readonly ICartRepository _cartRepository;
+        public OrderServices(IOrderRepository orderRepository, ICustomerRepository customerRepository, ISalesServices salesServices, IProductOrdersRepository productOrdersRepository, IProductRepository productRepository, IProductionRepository productionRepository, ICartRepository cartRepository)
         {
             _orderRepository = orderRepository;
             _customerRepository = customerRepository;
@@ -28,6 +29,7 @@ namespace Dansnom.Implementations.Services
             _productOrdersRepository = productOrdersRepository;
             _productRepository = productRepository;
             _productionRepository = productionRepository;
+            _cartRepository = cartRepository;
         }
         public async Task<BaseResponse> CreateOrderAsync(CreateOrderRequestModel model, int userId)
         {
@@ -52,6 +54,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
+
             var productions = await _productionRepository.GetAllApprovedProduction();
             foreach (var order in model.request)
             {
@@ -92,6 +95,7 @@ namespace Dansnom.Implementations.Services
                 }
 
             }
+            
             var ord = new Order
             {
                 CustomerId = customer.Id,
@@ -112,7 +116,7 @@ namespace Dansnom.Implementations.Services
                 {
                     ProductId = item.ProductId,
                     OrderId = cord.Id,
-                    QuantityBought = item.QuantityBought
+                    QuantityBought = item.QuantityBought,
                 };
                 await _productOrdersRepository.CreateAsync(productOrders);
             }

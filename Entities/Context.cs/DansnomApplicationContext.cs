@@ -47,6 +47,7 @@ namespace Dansnom.Context
         public DbSet<ProductionRawMaterial> ProductionRawMaterials { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<Cart> Carts { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Category> Categories { get; set; }
     }

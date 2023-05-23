@@ -17,6 +17,8 @@ namespace Dansnom.Interface.Repositories
         Task<decimal> GetSumOfAprovedRawMaterialForTheYearAsync();
         Task<List<RawMaterial>> GetAllApprovedRawMaterialsAsync();
         Task<List<RawMaterial>> GetAllPendingRawMaterialsAsync();
+        Task<List<RawMaterial>> GetAllAvailableRawMaterialAsync();
+        Task<List<RawMaterial>> GetRawMaterialsByNameAsync(string name);
     }
     
 }

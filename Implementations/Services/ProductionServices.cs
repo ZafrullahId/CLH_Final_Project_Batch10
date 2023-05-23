@@ -445,6 +445,7 @@ namespace Dansnom.Implementations.Services
                     QuantityRemaining = prodtion.QuantityRemaining,
                     QuantityProduced = prodtion.QuantityProduced,
                     QuantityRequest = prodtion.QuantityRequest,
+                    ApprovalStatus = prodtion.ApprovalStatus.ToString(),
                     RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
                         Id = x.RawMaterial.Id,
@@ -593,7 +594,7 @@ namespace Dansnom.Implementations.Services
             }
             foreach (var item in productions)
             {
-                
+
                 if ((DateTime.Now - item.CreatedOn).TotalSeconds < 60)
                 {
                     item.RequestTime = (int)(DateTime.Now - item.CreatedOn).TotalSeconds + " " + "Sec ago";
@@ -626,7 +627,7 @@ namespace Dansnom.Implementations.Services
                         Image = x.Admin.User.ProfileImage
                     },
                     ProductionId = x.Id,
-                    CreatedTime = x.CreatedOn.ToLongDateString(),   
+                    CreatedTime = x.CreatedOn.ToLongDateString(),
                     ApprovalStatus = x.ApprovalStatus.ToString(),
                     PostedTime = x.RequestTime,
                     ProductionDate = x.ProductionDate,
@@ -641,9 +642,9 @@ namespace Dansnom.Implementations.Services
                 }).ToList()
             };
         }
-        public async Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model)
+        public async Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model, List<int> ids)
         {
-            var production = await _productionRepository.GetAsync(x => x.Id == id);
+            var production = await _productionRawMaterialRepository.GetProductionsById(id);
             var product = await _productRepository.GetAsync(x => x.Name == model.ProductName);
             if (production == null)
             {
@@ -653,7 +654,7 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            if (production.ApprovalStatus == ApprovalStatus.Approved)
+            if (production[0].Production.ApprovalStatus == ApprovalStatus.Approved)
             {
                 return new BaseResponse
                 {
@@ -661,11 +662,29 @@ namespace Dansnom.Implementations.Services
                     Success = false
                 };
             }
-            production.QuantityProduced = model.QuantityProduced;
-            production.ProductId = product.Id;
-            production.QuantityRemaining = model.QuantityProduced - (production.QuantityProduced - production.QuantityRemaining);
-            production.ApprovalStatus = ApprovalStatus.Pending;
-            await _productionRepository.UpdateAsync(production);
+            production[0].Production.QuantityProduced = model.QuantityProduced;
+            production[0].Production.QuantityRequest = model.QuantityRequest;
+            production[0].Production.AdditionalMessage = model.AdditionalMessage ?? production[0].Production.AdditionalMessage;
+            production[0].Production.ProductId = product.Id;
+            production[0].Production.QuantityRemaining = model.QuantityProduced - (production[0].Production.QuantityProduced - production[0].Production.QuantityRemaining);
+            production[0].Production.ApprovalStatus = ApprovalStatus.Pending;
+            for (int i = 0; i < production.Count; i++)
+            {
+                if (i > ids.Count - 1)
+                {
+                    // production.RemoveRange(i, production.Count - i);
+                    for (int j = i; j < production.Count; j++)
+                    {
+                        production[i].IsDeleted = true;
+                    }
+                    break;
+                }
+                production[i].RawMaterialId = ids[i];
+            }
+            foreach (var item in production)
+            {
+                await _productionRawMaterialRepository.UpdateAsync(item);
+            }
             return new BaseResponse
             {
                 Message = "Production updated successfully",
@@ -753,11 +772,39 @@ namespace Dansnom.Implementations.Services
                     QuantityRequest = production[0].Production.QuantityRequest,
                     QuantityProduced = production[0].Production.QuantityProduced,
                     AdditionalMessage = production[0].Production.AdditionalMessage,
+                    ApprovalStatus = production[0].Production.ApprovalStatus.ToString(),
                     RawMaterialDto = production.Select(x => new RawMaterialDto
                     {
                         Name = x.RawMaterial.Name
                     }).ToList()
                 }
+            };
+        }
+        public async Task<BaseResponse> DeleteAsync(int id)
+        {
+            var production = await _productionRepository.GetAsync(id);
+            if (production == null)
+            {
+                return new BaseResponse
+                {
+                    Message = "Production not found",
+                    Success = false
+                };
+            }
+            if (production.ApprovalStatus == ApprovalStatus.Approved)
+            {
+                return new BaseResponse
+                {
+                    Message = "Production has been approved already",
+                    Success = false
+                };
+            }
+            production.IsDeleted = true;
+            await _productionRepository.UpdateAsync(production);
+            return new BaseResponse
+            {
+                Message = "Production Successfully Deleted",
+                Success = true
             };
         }
     }

@@ -10,6 +10,8 @@ namespace Dansnom.Entities
         public Customer Customer { get; set; }
         public int AddressId { get; set; }
         public Address Address { get; set; }
+        public int CartId { get; set; }
+        public Cart Cart { get; set; }
         public Sales Sales { get; set; }
         public List<ProductOrders> ProductOrders { get; set; } = new List<ProductOrders>();
     }

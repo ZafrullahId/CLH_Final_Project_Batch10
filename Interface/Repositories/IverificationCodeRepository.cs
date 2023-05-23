@@ -5,7 +5,7 @@ using Dansnom.Entities.Identity;
 
 namespace Dansnom.Interface.Repositories
 {
-    public interface IverificationCodeRepository : IBaseRepository<VerificationCode>
+    public interface IVerificationCodeRepository : IBaseRepository<VerificationCode>
     {
         
     }

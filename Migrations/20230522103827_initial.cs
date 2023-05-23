@@ -239,6 +239,33 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Carts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Carts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Chats",
                 columns: table => new
                 {
@@ -342,40 +369,6 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Orders",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    isDelivered = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    AddressId = table.Column<int>(type: "int", nullable: false),
-                    CreatedBy = table.Column<int>(type: "int", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
-                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DeletedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_Addresses_AddressId",
-                        column: x => x.AddressId,
-                        principalTable: "Addresses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Orders_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -432,6 +425,47 @@ namespace Project.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    isDelivered = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    AddressId = table.Column<int>(type: "int", nullable: false),
+                    CartId = table.Column<int>(type: "int", nullable: false),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_Addresses_AddressId",
+                        column: x => x.AddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Carts_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductionRawMaterials",
                 columns: table => new
                 {
@@ -460,6 +494,39 @@ namespace Project.Migrations
                         name: "FK_ProductionRawMaterials_RawMaterials_RawMaterialId",
                         column: x => x.RawMaterialId,
                         principalTable: "RawMaterials",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Likes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    ReviewId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
+                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Likes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Likes_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Likes_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -525,44 +592,16 @@ namespace Project.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Likes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    ReviewId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    CreatedBy = table.Column<int>(type: "int", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    LastModifiedBy = table.Column<int>(type: "int", nullable: false),
-                    LastModifiedOn = table.Column<DateTime>(type: "datetime", nullable: false),
-                    DeletedOn = table.Column<DateTime>(type: "datetime", nullable: true),
-                    DeletedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Likes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Likes_Reviews_ReviewId",
-                        column: x => x.ReviewId,
-                        principalTable: "Reviews",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Likes_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Admins_UserId",
                 table: "Admins",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Carts_ProductId",
+                table: "Carts",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Chats_SenderId",
@@ -589,6 +628,12 @@ namespace Project.Migrations
                 name: "IX_Orders_AddressId",
                 table: "Orders",
                 column: "AddressId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CartId",
+                table: "Orders",
+                column: "CartId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerId",
@@ -704,22 +749,25 @@ namespace Project.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Products");
-
-            migrationBuilder.DropTable(
                 name: "Admins");
 
             migrationBuilder.DropTable(
                 name: "Addresses");
 
             migrationBuilder.DropTable(
+                name: "Carts");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

@@ -478,7 +478,28 @@ namespace Dansnom.Implementations.Services
                 }
             };
         }
-
+        public async Task<RawMaterialsResponseModel> GetAvailableRawMaterialsAsync()
+        {
+            var rawmaterials = await _rawMaterialRepository.GetAllAvailableRawMaterialAsync();
+            if (rawmaterials.Count == 0)
+            {
+                return new RawMaterialsResponseModel
+                {
+                    Message = "No available raw material",
+                    Success = false
+                };
+            }
+            return new RawMaterialsResponseModel
+            {
+                Message = "raw material found",
+                Success = true,
+                Data = rawmaterials.Select(x => new RawMaterialDto{
+                    Id = x.Id,
+                    Name = x.Name,
+                    QuantiityRemaining = x.QuantiityRemaining
+                }).ToList()
+            };
+        }
         public async Task<RawMaterialResponseModel> CalculateRawMaterialCostForTheMonth()
         {
             var cost = await _rawMaterialRepository.GetSumOfAprovedRawMaterialForTheMonthAsync();

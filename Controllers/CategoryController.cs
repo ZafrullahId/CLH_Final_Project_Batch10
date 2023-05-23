@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Project.Controllers
 {
+    [ApiController]
     [Route("api/[controller]")]
     public class CategoryController : MyControllerBase
     {

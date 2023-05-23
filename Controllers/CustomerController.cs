@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Dansnom.Interface.Services;
 using Dansnom.Dtos.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Project.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerServices _customerServices;
@@ -58,15 +60,6 @@ namespace Project.Controllers
             }
             return Ok(customer);
         }
-        [HttpGet("VerifyCode/{code}/{id}")]
-        public async Task<IActionResult> VerifyCode([FromRoute] int code,int id)
-        {
-            var customer = await _customerServices.VerifyCode(id,code);
-            if(customer.Success == false)
-            {
-                return BadRequest(customer);
-            }
-            return Ok(customer);
-        }
+        
     }
 }

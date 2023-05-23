@@ -97,13 +97,17 @@ namespace Project
             services.AddScoped<IAddressRepository,AddressRepository>();
             services.AddScoped<IAddressService,AddressService>();
 
-            services.AddScoped<IverificationCodeRepository,VarificationCodeRepository>();
+            services.AddScoped<IVerificationCodeRepository,VarificationCodeRepository>();
+            services.AddScoped<IVerificationCodeService, VeryficationCodeService>();
 
             services.AddScoped<IProductionRawMaterialRepository,ProductionRawMaterialRepository>();
             services.AddScoped<IProductionRawMaterialService,ProductionRawMaterialService>();
 
             services.AddScoped<ICategoryService,CategoryService>();
             services.AddScoped<ICategoryRepository,CategoryRepository>();
+
+            services.AddScoped<ICartService, CartService>();
+            services.AddScoped<ICartRepository, CartRepository>();
 
             services.AddScoped<IMailServices,MailService>();
 
@@ -147,6 +151,7 @@ namespace Project
             app.UseCors("Dansnom");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {

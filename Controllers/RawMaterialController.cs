@@ -1,3 +1,4 @@
+using System.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,6 +108,16 @@ namespace Project.Controllers
                 return BadRequest(RawMaterial);
             }
             return Ok(RawMaterial);
+        }
+        [HttpGet("GetAvailableRawmaterails")]
+        public async Task<IActionResult> GetGetAvailableRawmaterailsAsync()
+        {
+            var rawmaterials = await _rawMaterialServuce.GetAvailableRawMaterialsAsync();
+            if (rawmaterials.Success == false)
+            {
+                return BadRequest(rawmaterials);
+            }
+            return Ok(rawmaterials);
         }
 
         [HttpGet("CalculateCostOfRawMaterialsForTheMonth")]

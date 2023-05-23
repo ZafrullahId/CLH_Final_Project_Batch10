@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dansnom.Implementations.Repositories
 {
-    public class VarificationCodeRepository : BaseRepository<VerificationCode> , IverificationCodeRepository
+    public class VarificationCodeRepository : BaseRepository<VerificationCode> , IVerificationCodeRepository
     {
         public VarificationCodeRepository(DansnomApplicationContext context)
         {
             _Context = context;
         } 
-
+        
     }
 }

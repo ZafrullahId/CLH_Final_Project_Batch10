@@ -8,8 +8,8 @@ namespace Dansnom.Interface.Services
 {
     public interface IProductionServices
     {
-        Task<BaseResponse> RejectProduction(int id, RejectRequestRequestModel model);
-         Task<BaseResponse> AproveProduction(int id);
+        Task<BaseResponse> DeleteAsync(int id);
+        Task<BaseResponse> AproveProduction(int id);
         Task<ProductionsResponseModel> GetAllProductionAsync();
         Task<ProductionResponseModel> GetProductionById(int id);
         Task<ProductionsResponseModel> GetAllAprovedProductionsAsync();
@@ -18,9 +18,10 @@ namespace Dansnom.Interface.Services
         Task<ProductionsResponseModel> GetProductionsByProductIdAsync(int id);
         Task<ProductionsResponseModel> GetProductionsByDateAsync(string date);
         Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductAsync();
-        Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model);
+        Task<BaseResponse> RejectProduction(int id, RejectRequestRequestModel model);
         Task<ProductionsResponseModel> GetAllAprovedProductionsByMonthAsync(int year, int month);
         Task<ProductionsResponseModel> GetAllApprovedProductionsOnEachProductByMonthAsync(int month);
+        Task<BaseResponse> UpdateProductionAsync(int id, UpdateProductionRequestModel model, List<int> ids);
         Task<BaseResponse> CreateProductionAsync(CreateProductionRequestModel model, List<int> ids, int adminId);
     }
 }

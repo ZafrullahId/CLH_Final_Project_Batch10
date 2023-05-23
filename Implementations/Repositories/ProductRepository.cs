@@ -25,7 +25,7 @@ namespace Dansnom.Implementations.Repositories
         }
          public async Task<List<Product>> GetAllProductsAsync()
          {
-            return await _Context.Products.Where(x => x.IsDeleted == false).ToListAsync();
+            return await _Context.Products.Include(x => x.Category).Where(x => x.IsDeleted == false).ToListAsync();
          }
          public async Task<List<Production>> GetProductsReadyForDelivery()
          {
