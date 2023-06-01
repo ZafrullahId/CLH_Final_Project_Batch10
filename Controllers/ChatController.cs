@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Dansnom.Interface.Services;
 using Dansnom.Dtos.RequestModel;
+using Microsoft.Extensions.Configuration;
+using Dansnom.Auth;
 
 namespace Project.Controllers
 {
@@ -13,14 +15,25 @@ namespace Project.Controllers
     [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
+        private readonly IConfiguration _config;
+        private readonly IJWTAuthenticationManager _tokenService;
         private readonly IChatService _chatService;
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, IJWTAuthenticationManager tokenService, IConfiguration config)
         {
             _chatService = chatService;
+            _tokenService = tokenService;
+            _config = config;
         }
         [HttpPost("CreateChat/{id}/{recieverId}")]
         public async Task<IActionResult> CreateChat([FromBody]CreateChatRequestModel model, [FromRoute]int id, [FromRoute]int recieverId)
         {
+            string token = Request.Headers["Authorization"];
+            string extractedToken = token.Substring(7);
+            var isValid = _tokenService.IsTokenValid(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), extractedToken);
+            if (!isValid)
+            {
+                return Unauthorized();
+            }
             var chat = await _chatService.CreateChat(model, id, recieverId);
             if (chat.Success == false)
             {

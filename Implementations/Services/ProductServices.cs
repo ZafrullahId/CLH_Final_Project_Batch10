@@ -29,7 +29,7 @@ namespace Dansnom.Implementations.Services
         }
         public async Task<BaseResponse> CreateProduct(CreateProductRequestModel model)
         {
-            var exist = await _productRepository.ExistsAsync(p => p.Name == model.Name.ToLower() && p.IsDeleted == false);
+            var exist = await _productRepository.ExistsAsync(p => p.Name.ToLower() == model.Name.ToLower() && p.IsDeleted == false);
             if (exist)
             {
                 return new BaseResponse

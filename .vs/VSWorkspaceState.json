@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Implementations",
-    "\\Implementations\\Repositories"
+    "\\Implementations\\Services",
+    "\\Payment"
   ],
-  "SelectedNode": "\\Implementations\\Repositories\\ProductOrdersRepository.cs",
+  "SelectedNode": "\\Payment\\PaymentService.cs",
   "PreviewInSolutionExplorer": false
 }

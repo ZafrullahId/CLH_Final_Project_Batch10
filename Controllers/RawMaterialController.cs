@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Dansnom.Interface.Services;
 using Dansnom.Dtos.RequestModel;
+using Microsoft.Extensions.Configuration;
+using Dansnom.Auth;
 
 namespace Project.Controllers
 {
@@ -15,14 +17,18 @@ namespace Project.Controllers
     public class RawMaterialController : ControllerBase
     {
         private readonly IRwavMaterialServuce _rawMaterialServuce;
-        public RawMaterialController(IRwavMaterialServuce rwavMaterialServuce)
+        private readonly IConfiguration _config;
+        private readonly IJWTAuthenticationManager _tokenService;
+        public RawMaterialController(IRwavMaterialServuce rwavMaterialServuce, IJWTAuthenticationManager tokenService, IConfiguration config)
         {
             _rawMaterialServuce = rwavMaterialServuce;
+            _tokenService = tokenService;
+            _config = config;
         }
         [HttpPost("CreateRawMaterial/{managerId}")]
-        public async Task<IActionResult> CreateAsync([FromForm] CreateRawMaterialRequestModel model,[FromRoute]int managerId)
+        public async Task<IActionResult> CreateAsync([FromForm] CreateRawMaterialRequestModel model, [FromRoute] int managerId)
         {
-            var RawMaterial = await _rawMaterialServuce.CreateRawMaterial(model,managerId);
+            var RawMaterial = await _rawMaterialServuce.CreateRawMaterial(model, managerId);
             if (RawMaterial.Success == false)
             {
                 return BadRequest(RawMaterial);
@@ -141,10 +147,10 @@ namespace Project.Controllers
             return Ok(cost);
         }
         [HttpPut("UpdateRawMaterial/{id}")]
-        public async Task<IActionResult> UpdateRawMaterial(int id,[FromForm]UpdateRawMaterialRequestModel model)
+        public async Task<IActionResult> UpdateRawMaterial(int id, [FromForm] UpdateRawMaterialRequestModel model)
         {
-            var raw = await _rawMaterialServuce.UpdateRawMaterialRequestAsync(id,model);
-             if (raw.Success == false)
+            var raw = await _rawMaterialServuce.UpdateRawMaterialRequestAsync(id, model);
+            if (raw.Success == false)
             {
                 return BadRequest(raw);
             }
@@ -153,6 +159,13 @@ namespace Project.Controllers
         [HttpPut("ApproveRawMaterial/{id}")]
         public async Task<IActionResult> ApproveRawMaterialAsync([FromRoute] int id)
         {
+            string token = Request.Headers["Authorization"];
+            string extractedToken = token.Substring(7);
+            var isValid = _tokenService.IsTokenValid(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), extractedToken);
+            if (!isValid)
+            {
+                return Unauthorized();
+            }
             var expense = await _rawMaterialServuce.ApproveRawMaterialAsync(id);
             if (expense.Success == false)
             {
@@ -161,9 +174,16 @@ namespace Project.Controllers
             return Ok(expense);
         }
         [HttpPut("RejectRawMaterial/{id}")]
-        public async Task<IActionResult> RejectRawMaterialAsync([FromRoute] int id,[FromBody]RejectRequestRequestModel model)
+        public async Task<IActionResult> RejectRawMaterialAsync([FromRoute] int id, [FromBody] RejectRequestRequestModel model)
         {
-            var expense = await _rawMaterialServuce.RejectRawMaterialAsync(id,model);
+            string token = Request.Headers["Authorization"];
+            string extractedToken = token.Substring(7);
+            var isValid = _tokenService.IsTokenValid(_config["Jwt:Key"].ToString(), _config["Jwt:Issuer"].ToString(), extractedToken);
+            if (!isValid)
+            {
+                return Unauthorized();
+            }
+            var expense = await _rawMaterialServuce.RejectRawMaterialAsync(id, model);
             if (expense.Success == false)
             {
                 return BadRequest(expense);

@@ -10,7 +10,10 @@ using Dansnom.Implementations.Repositories;
 using Dansnom.Implementations.Services;
 using Dansnom.Interface.Repositories;
 using Dansnom.Interface.Services;
+using Dansnom.Payment;
 using DansnomEmailServices;
+using Implementations.Repositories;
+using Interface.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -106,8 +109,9 @@ namespace Project
             services.AddScoped<ICategoryService,CategoryService>();
             services.AddScoped<ICategoryRepository,CategoryRepository>();
 
-            services.AddScoped<ICartService, CartService>();
-            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IPayStackPayment, PayStackPayment>();
+
 
             services.AddScoped<IMailServices,MailService>();
 

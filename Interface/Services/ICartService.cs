@@ -1,7 +1,7 @@
-namespace Dansnom.Interface.Services
-{
-    public interface ICartService
-    {
+// namespace Dansnom.Interface.Services
+// {
+//     public interface ICartService
+//     {
         
-    }
-}
+//     }
+// }

@@ -16,9 +16,13 @@ namespace Project.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserServices _userServices;
-        public UserController(IUserServices userServices)
+        private readonly IConfiguration _config;
+        private readonly IJWTAuthenticationManager _tokenService;
+        public UserController(IUserServices userServices, IConfiguration config, IJWTAuthenticationManager tokenService)
         {
             _userServices = userServices;
+            _config = config;
+            _tokenService = tokenService;
         }
         [HttpPost("Login")]
         public async Task<IActionResult> LoginAsync([FromBody]LoginRequestModel model)
@@ -33,6 +37,7 @@ namespace Project.Controllers
         [HttpGet("GetUsersByRole/{role}")]
         public async Task<IActionResult> GetUsersByRoleAsync([FromRoute]string role)
         {
+            
             var users = await _userServices.GetUsersByRoleAsync(role);
             if(users.Success == false)
             {

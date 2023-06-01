@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Dansnom.Interface.Services;
+using Dtos.RequestModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Controllers
@@ -32,6 +33,16 @@ namespace Controllers
                 return BadRequest(code);
             }
             return Ok(code);
+        }
+        [HttpPut("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromForm]ResetPasswordRequestModel model)
+        {
+            var reset = await _verificationCodeService.SendForgetPasswordVerificationCode(model.Email);
+            if (reset.Success == false)
+            {
+                return BadRequest(reset);
+            }
+            return Ok(reset);
         }
     }
 }

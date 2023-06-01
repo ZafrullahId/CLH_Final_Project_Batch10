@@ -35,7 +35,7 @@ namespace Dansnom.Implementations.Repositories
         {
             return await _Context.Customers
             .Include(c => c.User)
-            .SingleOrDefaultAsync(x => x.User.Email == email && x.IsDeleted == false);
+            .SingleOrDefaultAsync(x => x.User.Email == email && x.User.IsDeleted == false);
         }
     } 
 }

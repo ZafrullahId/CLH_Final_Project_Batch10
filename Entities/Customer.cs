@@ -14,7 +14,7 @@ namespace Dansnom.Entities
         public List<Order> Orders = new List<Order>();
         public List<Review> Review { get; set; } = new List<Review>();
         public List<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
-       
+        public List<PaymentReference> Payments { get; set; } = new List<PaymentReference>();       
 
     }
 }

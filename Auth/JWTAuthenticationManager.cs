@@ -31,7 +31,7 @@ namespace Dansnom.Auth
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var tokenDescriptor = new JwtSecurityToken(issuer, issuer, claims,
-                expires: DateTime.Now.AddMinutes(2), signingCredentials: credentials);
+                expires: DateTime.Now.AddHours(5), signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
 
         }
@@ -41,6 +41,7 @@ namespace Dansnom.Auth
             var mySecurityKey = new SymmetricSecurityKey(mySecret);
 
             var tokenHandler = new JwtSecurityTokenHandler();
+            
             try
             {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -48,6 +49,7 @@ namespace Dansnom.Auth
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidIssuer = issuer,
                     ValidAudience = issuer,
                     IssuerSigningKey = mySecurityKey,

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Dansnom.Dtos.ResponseModel;
+using Dansnom.Dtos.ResponseModels;
 
 namespace Dansnom.Interface.Services
 {
@@ -7,5 +8,6 @@ namespace Dansnom.Interface.Services
     {
         Task<BaseResponse> UpdateVeryficationCodeAsync(int id);
         Task<BaseResponse> VerifyCode(int id, int verificationcode);
+        Task<ResetPasswordResponseModel> SendForgetPasswordVerificationCode(string email);
     }
 }

@@ -120,3 +120,10 @@ C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\obj\Debug\net5.0\ref\P
 C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\obj\Debug\net5.0\Project.pdb
 C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\obj\Debug\net5.0\Project.genruntimeconfig.cache
 C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\ref\Project.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\OpenSSL.PrivateKeyDecoder.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\OpenSSL.X509Certificate2.Provider.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\CloudrailSI.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\PayPal.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\PayPalCore.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\PayPalCoreSDK.dll
+C:\Users\zafru\OneDrive\Desktop\CLH_Final_Project_Batch10\bin\Debug\net5.0\PayStack.Net.dll

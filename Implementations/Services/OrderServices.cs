@@ -20,8 +20,7 @@ namespace Dansnom.Implementations.Services
         private readonly IProductOrdersRepository _productOrdersRepository;
         private readonly IProductRepository _productRepository;
         private readonly IProductionRepository _productionRepository;
-        private readonly ICartRepository _cartRepository;
-        public OrderServices(IOrderRepository orderRepository, ICustomerRepository customerRepository, ISalesServices salesServices, IProductOrdersRepository productOrdersRepository, IProductRepository productRepository, IProductionRepository productionRepository, ICartRepository cartRepository)
+        public OrderServices(IOrderRepository orderRepository, ICustomerRepository customerRepository, ISalesServices salesServices, IProductOrdersRepository productOrdersRepository, IProductRepository productRepository, IProductionRepository productionRepository)
         {
             _orderRepository = orderRepository;
             _customerRepository = customerRepository;
@@ -29,7 +28,6 @@ namespace Dansnom.Implementations.Services
             _productOrdersRepository = productOrdersRepository;
             _productRepository = productRepository;
             _productionRepository = productionRepository;
-            _cartRepository = cartRepository;
         }
         public async Task<BaseResponse> CreateOrderAsync(CreateOrderRequestModel model, int userId)
         {
@@ -76,7 +74,7 @@ namespace Dansnom.Implementations.Services
                     if (quantityOrdered == 0)
                     {
                         isRemaining = true;
-                        await _productionRepository.UpdateAsync(production);
+                        // await _productionRepository.UpdateAsync(production);
                         break;
                     }
                     else
@@ -120,9 +118,10 @@ namespace Dansnom.Implementations.Services
                 };
                 await _productOrdersRepository.CreateAsync(productOrders);
             }
+            await _productionRepository.SaveChangesAsync();
             return new BaseResponse
             {
-                Message = "Successfully Ordered",
+                Message = cord.Id.ToString(),
                 Success = true
             };
         }

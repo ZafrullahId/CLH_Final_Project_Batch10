@@ -67,6 +67,30 @@
               "target": "Package",
               "version": "[5.0.17, )"
             },
+            "PayPal": {
+              "target": "Package",
+              "version": "[1.9.1, )"
+            },
+            "PayPal.Api": {
+              "target": "Package",
+              "version": "[1.0.6, )"
+            },
+            "PayPal.SDK.NETCore": {
+              "target": "Package",
+              "version": "[1.9.1.2, )"
+            },
+            "PayPalCore": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "PayPalCoreSDK": {
+              "target": "Package",
+              "version": "[1.7.1, )"
+            },
+            "Paystack.Net": {
+              "target": "Package",
+              "version": "[1.1.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[5.6.3, )"

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Dansnom.Dtos.RequestModel;
 using Dansnom.Dtos.ResponseModel;
+using Dansnom.Dtos.ResponseModels;
 using Dansnom.Interface.Repositories;
 using Dansnom.Interface.Services;
 using DansnomEmailServices;
@@ -13,11 +14,13 @@ namespace Dansnom.Implementations.Services
         private readonly IMailServices _mailService;
         private readonly ICustomerRepository _customerRepository;
         private readonly IVerificationCodeRepository _verificationCodeRepository;
-        public VeryficationCodeService(IVerificationCodeRepository verificationCodeRepository, ICustomerRepository customerRepository, IMailServices mailServices)
+        private readonly IUserRepository _userRepository;
+        public VeryficationCodeService(IVerificationCodeRepository verificationCodeRepository, ICustomerRepository customerRepository, IMailServices mailServices, IUserRepository userRepository)
         {
             _mailService = mailServices;
             _customerRepository = customerRepository;
             _verificationCodeRepository = verificationCodeRepository;
+            _userRepository = userRepository;
         }
         public async Task<BaseResponse> VerifyCode(int id, int verificationcode)
         {
@@ -69,6 +72,7 @@ namespace Dansnom.Implementations.Services
             }
             int random = new Random().Next(10000, 99999);
             code.Code = random;
+            code.CreatedOn = DateTime.Now;
             var mailRequest = new MailRequest
             {
                 Subject = "Confirmation Code",
@@ -81,6 +85,47 @@ namespace Dansnom.Implementations.Services
             return new BaseResponse
             {
                 Message = "Code Successfully resent",
+                Success = true
+            };
+        }
+        public async Task<ResetPasswordResponseModel> SendForgetPasswordVerificationCode(string email)
+        {
+            var customer = await _customerRepository.GetByEmailAsync(email);
+            if (customer == null)
+            {
+                return new ResetPasswordResponseModel
+                {
+                    Message = "Email not found",
+                    Success = false
+                };
+            }
+            var code = await _verificationCodeRepository.GetAsync(x => x.CustomerId == customer.Id);
+            if (code == null)
+            {
+                return new ResetPasswordResponseModel
+                {
+                    Message = "No Code has been sent to at registration point",
+                    Success = false
+                };
+            }
+            int random = new Random().Next(10000, 99999);
+            code.Code = random;
+            code.CreatedOn = DateTime.Now;
+            var mailRequest = new MailRequest
+            {
+                Subject = "Reset Password",
+                ToEmail = customer.User.Email,
+                ToName = customer.FullName,
+                HtmlContent = $"<html><body><h1>Hello {customer.FullName}, Welcome</h1><h4>Your Password reset code is {code.Code} to reset your password</h4></body></html>",
+            };
+            _mailService.SendEMailAsync(mailRequest);
+            customer.User.IsDeleted = true;
+            await _customerRepository.UpdateAsync(customer);
+            await _verificationCodeRepository.UpdateAsync(code);
+            return new ResetPasswordResponseModel
+            {
+                Id = customer.Id,
+                Message = "Reset Password Code Successfully Reset",
                 Success = true
             };
         }
