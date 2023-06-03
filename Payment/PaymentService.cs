@@ -8,6 +8,7 @@ using Dtos.RequestModels;
 using Interface.Repositories;
 using Newtonsoft.Json;
 using Dansnom.Payment;
+using Dansnom.Dtos;
 
 public class PayStackPayment : IPayStackPayment
 {
@@ -54,7 +55,7 @@ public class PayStackPayment : IPayStackPayment
             email = model.Email,
             phone = model.PhoneNumber,
             reference = Guid.NewGuid().ToString(),
-            callback_url = "http://127.0.0.1:5501/FrontEnd/dashboard/receipt.html",
+            callback_url = $"http://127.0.0.1:5501/FrontEnd/dashboard/receipt.html?id={orderId}",
             first_name = customer.FullName.Split(" ")[0],
             last_name = customer.FullName.Split(" ")[1]
             
@@ -100,11 +101,16 @@ public class PayStackPayment : IPayStackPayment
             throw new Exception($"Payment initiation failed. Response: {responseContent}");
         }
     }
-    public static async Task<string> GetTransactionRecieptAsync(string transactionReference)
+    public async Task<string> GetTransactionRecieptAsync(string transactionReference)
     {
         if (transactionReference == null)
         {
             return null;
+        }
+        var transaction = await _paymentRepository.GetAsync(transactionReference);
+        if (transaction == null)
+        {
+            return null;    
         }
         string url = $"https://api.paystack.co/transaction/verify/{transactionReference}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -124,6 +130,13 @@ public class PayStackPayment : IPayStackPayment
             // var receiptNumber = transaction.data.receipt.number;
 
             // Do further processing with the receipt information
+            var transactionDto = new PaymentReferenceDto
+            {
+                PhoneNumber = transaction.Customer.PhoneNumber,
+                FirstName = transaction.Customer.FullName.Split(" ")[0],
+                LastName = transaction.Customer.FullName.Split(" ")[0],
+                ResponseContent = responseContent
+            };
             return responseContent;
         }
         else

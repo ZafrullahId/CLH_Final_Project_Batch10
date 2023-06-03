@@ -25,12 +25,12 @@ namespace Controllers
         [HttpGet("Get/{transactionReference}")]
         public async Task<IActionResult> GetTransactionReceipt([FromRoute]string transactionReference)
         {
-            var transaction = await PayStackPayment.GetTransactionRecieptAsync(transactionReference);
-            if (transaction == null)
+            var transaction = await _payStackPayment.GetTransactionRecieptAsync(transactionReference);
+            if (transaction == null || transaction == null)
             {
                 return BadRequest(transaction);
             }
-            return Ok(transaction);
+            return new OkObjectResult(transaction);
         }
     }
 }
